@@ -225,11 +225,8 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
         <div>
           <h2 className="text-lg font-black text-slate-900 flex items-center gap-2 font-cairo">
             <Receipt className="w-5 h-5 text-sky-600" />
-            إدارة الفواتير الضريبية والمبيعات والمشتريات (E-Invoicing)
+            الفواتير الضريبية
           </h2>
-          <p className="text-xs text-slate-500">
-            إصدار فواتير ضريبية معتمدة، احتساب ضريبة القيمة المضافة 14% والخصم من المنبع 1%، والتوليد الآلي للقيود
-          </p>
         </div>
 
         <div className="flex items-center flex-wrap gap-2">
@@ -241,7 +238,7 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
             className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition-colors cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>إصدار فاتورة مبيعات جديدة</span>
+            <span>إصدار فاتورة مبيعات</span>
           </button>
 
           <button
@@ -505,7 +502,7 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                             />
                           </td>
                           <td className="py-2 px-3 font-mono font-bold text-sky-700 text-left">
-                            {Number(item.total).toLocaleString()} ج.م
+                            {Number(item?.total || 0).toLocaleString()} ج.م
                           </td>
                           <td className="py-2 px-2 text-center">
                             {items.length > 1 && (
@@ -626,25 +623,25 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                 <div className="space-y-2 divide-y divide-slate-200 font-mono text-xs">
                   <div className="flex justify-between py-1 text-slate-700">
                     <span className="font-sans">المجموع الفرعي للبضائع والخدمات:</span>
-                    <span className="font-bold text-slate-900">{subtotal.toLocaleString()} ج.م</span>
+                    <span className="font-bold text-slate-900">{(subtotal || 0).toLocaleString()} ج.م</span>
                   </div>
                   {discountAmount > 0 && (
                     <div className="flex justify-between py-1 text-emerald-700">
                       <span className="font-sans">الخصم التجاري الممنوح:</span>
-                      <span>-{discountAmount.toLocaleString()} ج.م</span>
+                      <span>-{(discountAmount || 0).toLocaleString()} ج.م</span>
                     </div>
                   )}
                   <div className="flex justify-between py-1.5 text-amber-700 bg-amber-50/50 px-2 rounded">
                     <span className="font-sans font-semibold">ضريبة القيمة المضافة ({vatRate}% VAT):</span>
-                    <span className="font-bold">+{vatAmount.toLocaleString()} ج.م</span>
+                    <span className="font-bold">+{(vatAmount || 0).toLocaleString()} ج.م</span>
                   </div>
                   <div className="flex justify-between py-1.5 text-rose-700 bg-rose-50/50 px-2 rounded">
                     <span className="font-sans font-semibold">خصم من المنبع أ/ت ({withholdingTaxRate}% WHT):</span>
-                    <span className="font-bold">-{withholdingTaxAmount.toLocaleString()} ج.م</span>
+                    <span className="font-bold">-{(withholdingTaxAmount || 0).toLocaleString()} ج.م</span>
                   </div>
                   <div className="flex justify-between py-2 text-sm font-black text-sky-900 border-t-2 border-slate-300 bg-sky-50/70 px-2 rounded">
                     <span className="font-sans">صافي القيمة الإجمالية المستحقة:</span>
-                    <span>{totalAmount.toLocaleString()} ج.م</span>
+                    <span>{(totalAmount || 0).toLocaleString()} ج.م</span>
                   </div>
                 </div>
               </div>
@@ -731,10 +728,10 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                   <td className="border border-slate-300 p-2 text-center">{item.unit}</td>
                   <td className="border border-slate-300 p-2 text-center font-mono font-bold">{item.quantity}</td>
                   <td className="border border-slate-300 p-2 font-mono text-left">
-                    {Number(item.unitPrice).toLocaleString()}
+                    {Number(item?.unitPrice || 0).toLocaleString()}
                   </td>
                   <td className="border border-slate-300 p-2 font-mono text-left font-bold">
-                    {Number(item.total).toLocaleString()}
+                    {Number(item?.total || 0).toLocaleString()}
                   </td>
                 </tr>
               ))}
@@ -754,24 +751,24 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
               <div className="flex justify-between p-2 border-b border-slate-300 bg-slate-50 font-sans">
                 <span>المجموع الفرعي الخاضع للضريبة:</span>
                 <span className="font-mono font-bold">
-                  {Number(selectedInvoiceForPrint.subtotal).toLocaleString()} ج.م
+                  {Number(selectedInvoiceForPrint?.subtotal || 0).toLocaleString()} ج.م
                 </span>
               </div>
               <div className="flex justify-between p-2 border-b border-slate-300 font-sans text-emerald-800">
                 <span>ضريبة القيمة المضافة ({selectedInvoiceForPrint.vatRate}%):</span>
                 <span className="font-mono font-bold">
-                  +{Number(selectedInvoiceForPrint.vatAmount).toLocaleString()} ج.م
+                  +{Number(selectedInvoiceForPrint?.vatAmount || 0).toLocaleString()} ج.م
                 </span>
               </div>
               <div className="flex justify-between p-2 border-b border-slate-300 font-sans text-rose-800">
                 <span>خصم وتحصيل أ/ت تحت حساب الضريبة (1%):</span>
                 <span className="font-mono font-bold">
-                  -{Number(selectedInvoiceForPrint.withholdingTaxAmount).toLocaleString()} ج.م
+                  -{Number(selectedInvoiceForPrint?.withholdingTaxAmount || 0).toLocaleString()} ج.م
                 </span>
               </div>
               <div className="flex justify-between p-2.5 bg-slate-900 text-white font-sans font-black text-sm">
                 <span>صافي القيمة المستحقة:</span>
-                <span className="font-mono">{Number(selectedInvoiceForPrint.totalAmount).toLocaleString()} ج.م</span>
+                <span className="font-mono">{Number(selectedInvoiceForPrint?.totalAmount || 0).toLocaleString()} ج.م</span>
               </div>
             </div>
           </div>

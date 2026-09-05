@@ -440,28 +440,14 @@ export const EInvoiceETAView: React.FC<EInvoiceETAViewProps> = ({
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3">
               <div className="p-2.5 bg-sky-500/10 border border-sky-500/20 rounded-xl text-sky-400">
                 <Globe className="w-6 h-6" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl md:text-2xl font-bold text-white font-tajawal">
-                    بوابة منظومة الفاتورة والإيصال الإلكتروني (ETA SDK)
-                  </h1>
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                      etaConfig.environment === 'production'
-                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                        : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
-                    }`}
-                  >
-                    {etaConfig.environment === 'production' ? 'البيئة الفعلية (Production)' : 'بيئة الاختبار (Pre-Prod)'}
-                  </span>
-                </div>
-                <p className="text-xs md:text-sm text-slate-400 mt-0.5">
-                  الربط والتكامل الشامل مع مصلحة الضرائب المصرية (إرسال الفواتير V1.0 والإيصالات V1.2 والتحقق الآلي)
-                </p>
+                <h1 className="text-xl md:text-2xl font-bold text-white font-tajawal">
+                  الفاتورة الإلكترونية
+                </h1>
               </div>
             </div>
           </div>
@@ -547,23 +533,23 @@ export const EInvoiceETAView: React.FC<EInvoiceETAViewProps> = ({
 
           <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
             <div className="text-[11px] text-slate-400 mb-1">إجمالي المبيعات المرسلة</div>
-            <div className="text-sm font-bold text-white font-mono">{stats.totalSales.toLocaleString()} ج.م</div>
+            <div className="text-sm font-bold text-white font-mono">{(stats?.totalSales || 0).toLocaleString()} ج.م</div>
           </div>
 
           <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
             <div className="text-[11px] text-amber-400 mb-1">ضريبة القيمة المضافة (T1)</div>
-            <div className="text-sm font-bold text-amber-400 font-mono">+{stats.totalVat.toLocaleString()} ج.م</div>
+            <div className="text-sm font-bold text-amber-400 font-mono">+{(stats?.totalVat || 0).toLocaleString()} ج.م</div>
           </div>
 
           <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
             <div className="text-[11px] text-rose-400 mb-1">خصم أ/ت من المنبع (T4)</div>
-            <div className="text-sm font-bold text-rose-400 font-mono">-{stats.totalWht.toLocaleString()} ج.م</div>
+            <div className="text-sm font-bold text-rose-400 font-mono">-{(stats?.totalWht || 0).toLocaleString()} ج.م</div>
           </div>
 
           <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
             <div className="text-[11px] text-sky-400 mb-1">صافي القيمة المحصلة</div>
             <div className="text-sm font-bold text-sky-400 font-mono">
-              {(stats.totalSales + stats.totalVat - stats.totalWht).toLocaleString()} ج.م
+              {((stats?.totalSales || 0) + (stats?.totalVat || 0) - (stats?.totalWht || 0)).toLocaleString()} ج.م
             </div>
           </div>
         </div>
@@ -710,19 +696,19 @@ export const EInvoiceETAView: React.FC<EInvoiceETAViewProps> = ({
                       </td>
 
                       <td className="py-3 px-3 font-mono text-left text-slate-300">
-                        {doc.totalSales.toLocaleString()}
+                        {(doc?.totalSales || 0).toLocaleString()}
                       </td>
 
                       <td className="py-3 px-3 font-mono text-left text-amber-400">
-                        +{doc.vatAmount.toLocaleString()}
+                        +{(doc?.vatAmount || 0).toLocaleString()}
                       </td>
 
                       <td className="py-3 px-3 font-mono text-left text-rose-400">
-                        -{doc.withholdingTaxAmount.toLocaleString()}
+                        -{(doc?.withholdingTaxAmount || 0).toLocaleString()}
                       </td>
 
                       <td className="py-3 px-3 font-mono font-bold text-left text-emerald-400">
-                        {doc.totalAmount.toLocaleString()} ج.م
+                        {(doc?.totalAmount || 0).toLocaleString()} ج.م
                       </td>
 
                       <td className="py-3 px-3 text-center">
@@ -982,7 +968,7 @@ export const EInvoiceETAView: React.FC<EInvoiceETAViewProps> = ({
                             />
                           </td>
                           <td className="py-2 px-3 font-mono font-bold text-sky-400 text-left">
-                            {(item.quantity * item.unitPrice).toLocaleString()} ج.م
+                            {((item?.quantity || 0) * (item?.unitPrice || 0)).toLocaleString()} ج.م
                           </td>
                           <td className="py-2 px-2 text-center">
                             {items.length > 1 && (
@@ -1093,19 +1079,19 @@ export const EInvoiceETAView: React.FC<EInvoiceETAViewProps> = ({
                 <div className="space-y-2 font-mono text-xs divide-y divide-slate-800">
                   <div className="flex justify-between py-1 text-slate-300">
                     <span className="font-sans">إجمالي المبيعات (Sales Total):</span>
-                    <span className="font-bold">{formSubtotal.toLocaleString()} ج.م</span>
+                    <span className="font-bold">{(formSubtotal || 0).toLocaleString()} ج.م</span>
                   </div>
                   <div className="flex justify-between py-1 text-amber-400">
                     <span className="font-sans">ضريبة القيمة المضافة ({customVatRate}% VAT - T1):</span>
-                    <span className="font-bold">+{formVatTotal.toLocaleString()} ج.م</span>
+                    <span className="font-bold">+{(formVatTotal || 0).toLocaleString()} ج.م</span>
                   </div>
                   <div className="flex justify-between py-1 text-rose-400">
                     <span className="font-sans">خصم من المنبع أ/ت ({customWhtRate}% WHT - T4):</span>
-                    <span className="font-bold">-{formWhtTotal.toLocaleString()} ج.م</span>
+                    <span className="font-bold">-{(formWhtTotal || 0).toLocaleString()} ج.م</span>
                   </div>
                   <div className="flex justify-between py-2 text-sm font-bold text-emerald-400 border-t border-slate-700">
                     <span className="font-sans">الإجمالي النهائي للمستند (Total Amount):</span>
-                    <span>{formGrandTotal.toLocaleString()} ج.م</span>
+                    <span>{(formGrandTotal || 0).toLocaleString()} ج.م</span>
                   </div>
                 </div>
               </div>
@@ -1596,8 +1582,8 @@ export const EInvoiceETAView: React.FC<EInvoiceETAViewProps> = ({
                       <td className="py-2.5 px-3 font-semibold">{line.description}</td>
                       <td className="py-2.5 px-3 font-mono text-slate-600 text-[11px]">{line.itemCode}</td>
                       <td className="py-2.5 px-3 text-center font-mono">{line.quantity}</td>
-                      <td className="py-2.5 px-3 text-left font-mono">{line.unitValue.amountEGP.toLocaleString()}</td>
-                      <td className="py-2.5 px-3 text-left font-mono font-bold">{line.salesTotal.toLocaleString()} ج.م</td>
+                      <td className="py-2.5 px-3 text-left font-mono">{(line?.unitValue?.amountEGP || 0).toLocaleString()}</td>
+                      <td className="py-2.5 px-3 text-left font-mono font-bold">{(line?.salesTotal || 0).toLocaleString()} ج.م</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1608,19 +1594,19 @@ export const EInvoiceETAView: React.FC<EInvoiceETAViewProps> = ({
                 <div className="w-72 bg-slate-50 p-4 rounded-xl border border-slate-300 space-y-2 text-xs font-mono">
                   <div className="flex justify-between text-slate-700">
                     <span>إجمالي المبيعات:</span>
-                    <span className="font-bold">{selectedDocForPreview.totalSales.toLocaleString()} ج.م</span>
+                    <span className="font-bold">{(selectedDocForPreview?.totalSales || 0).toLocaleString()} ج.م</span>
                   </div>
                   <div className="flex justify-between text-amber-800">
                     <span>ضريبة القيمة المضافة T1:</span>
-                    <span className="font-bold">+{selectedDocForPreview.vatAmount.toLocaleString()} ج.م</span>
+                    <span className="font-bold">+{(selectedDocForPreview?.vatAmount || 0).toLocaleString()} ج.م</span>
                   </div>
                   <div className="flex justify-between text-rose-800">
                     <span>خصم أ/ت تحت حساب الضريبة T4:</span>
-                    <span className="font-bold">-{selectedDocForPreview.withholdingTaxAmount.toLocaleString()} ج.م</span>
+                    <span className="font-bold">-{(selectedDocForPreview?.withholdingTaxAmount || 0).toLocaleString()} ج.م</span>
                   </div>
                   <div className="flex justify-between text-sm font-black text-slate-900 border-t-2 border-slate-400 pt-2">
                     <span>صافي القيمة المستحقة:</span>
-                    <span>{selectedDocForPreview.totalAmount.toLocaleString()} ج.م</span>
+                    <span>{(selectedDocForPreview?.totalAmount || 0).toLocaleString()} ج.م</span>
                   </div>
                 </div>
               </div>

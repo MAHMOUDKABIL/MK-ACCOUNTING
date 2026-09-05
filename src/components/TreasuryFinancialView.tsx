@@ -180,7 +180,7 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
           <td>${t.date}</td>
           <td><span style="color: ${t.type === 'income' ? '#059669' : '#dc2626'}">${t.type === 'income' ? 'وارد (استلام)' : 'منصرف (رسوم)'}</span></td>
           <td><strong>${t.clientName}</strong></td>
-          <td><strong>${t.amount.toLocaleString()} ج.م</strong></td>
+          <td><strong>${(t.amount || 0).toLocaleString()} ج.م</strong></td>
           <td>${t.category}</td>
           <td>${t.serviceDescription}</td>
         </tr>
@@ -197,9 +197,9 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
       <div style="margin: 15px 0; padding: 10px; background-color: #f1f5f9; border-radius: 6px;">
         <table style="border: none; margin: 0;">
           <tr>
-            <td style="border: none;">إجمالي الوارد (مقبوضات): <strong>${summary.totalIncome.toLocaleString()} ج.م</strong></td>
-            <td style="border: none;">إجمالي المنصرف (إجراءات): <strong>${summary.totalExpenses.toLocaleString()} ج.م</strong></td>
-            <td style="border: none;">صافي الرصيد والأتعاب: <strong>${summary.netTreasuryBalance.toLocaleString()} ج.م</strong></td>
+            <td style="border: none;">إجمالي الوارد (مقبوضات): <strong>${(summary?.totalIncome || 0).toLocaleString()} ج.م</strong></td>
+            <td style="border: none;">إجمالي المنصرف (إجراءات): <strong>${(summary?.totalExpenses || 0).toLocaleString()} ج.م</strong></td>
+            <td style="border: none;">صافي الرصيد والأتعاب: <strong>${(summary?.netTreasuryBalance || 0).toLocaleString()} ج.م</strong></td>
           </tr>
         </table>
       </div>
@@ -234,29 +234,27 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Page Header: ENTERSOFT Treasury & Client Accounts */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
-                <Wallet className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-white font-tajawal">
-                  نظام الخزينة والماليات وأتعاب العملاء
-                </h1>
-                <p className="text-xs md:text-sm text-slate-400">
-                  تسجيل الوارد والمنصرف على الإجراءات وحساب صافي أتعاب المكتب مع التسميع التلقائي
-                </p>
-              </div>
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5 relative z-10">
+          {/* Title */}
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 bg-emerald-600/10 border border-emerald-500/30 rounded-2xl text-emerald-400 shadow-sm shrink-0">
+              <Wallet className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-white font-somar">
+                خزينة المكتب
+              </h1>
+              <p className="text-xs text-slate-400 font-sans mt-0.5">
+                إدارة المقبوضات والمدفوعات، حركة أتعاب العملاء، وإصدار إيصالات الصرف والاستلام المعتمدة
+              </p>
             </div>
           </div>
 
-          {/* Header Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          {/* Header Action Buttons (Aligned to the Left with Uniform Height & Styling) */}
+          <div className="flex flex-wrap items-center gap-2 xl:mr-auto shrink-0">
+            {/* Button 1: تسجيل وارد */}
             <button
               onClick={() => {
                 setFormData({
@@ -266,12 +264,13 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
                 });
                 setIsAddModalOpen(true);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs md:text-sm font-bold shadow-lg shadow-emerald-600/20 transition-all cursor-pointer"
+              className="h-10 px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
             >
               <ArrowDownLeft className="w-4 h-4" />
-              <span>تسجيل وارد (سند قبض أتعاب)</span>
+              <span>تسجيل وارد</span>
             </button>
 
+            {/* Button 2: تسجيل منصرف */}
             <button
               onClick={() => {
                 setFormData({
@@ -282,41 +281,41 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
                 });
                 setIsAddModalOpen(true);
               }}
-              className="flex items-center gap-2 px-3.5 py-2.5 bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 rounded-xl text-xs md:text-sm font-bold transition-all cursor-pointer"
+              className="h-10 px-4 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs md:text-sm font-bold shadow-md shadow-rose-600/20 flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap active:scale-[0.98]"
             >
               <ArrowUpRight className="w-4 h-4" />
-              <span>تسجيل منصرف (سند صرف إجراءات)</span>
+              <span>تسجيل منصرف</span>
             </button>
 
-            {/* Export buttons */}
-            <div className="flex items-center gap-1.5 bg-slate-800 p-1 rounded-xl border border-slate-700">
-              <button
-                onClick={handleExportExcel}
-                title="تصدير إلى Excel"
-                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer border border-emerald-500/30"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5" />
-                <span>Excel</span>
-              </button>
+            {/* Button 3: Excel */}
+            <button
+              onClick={handleExportExcel}
+              title="تصدير إلى Excel"
+              className="h-10 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 hover:border-emerald-500/50 rounded-xl text-xs md:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-[0.98]"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+              <span>EXCEL</span>
+            </button>
 
-              <button
-                onClick={handleExportWord}
-                title="تصدير إلى Word"
-                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer border border-blue-500/30"
-              >
-                <FileText className="w-3.5 h-3.5" />
-                <span>Word</span>
-              </button>
+            {/* Button 4: Word */}
+            <button
+              onClick={handleExportWord}
+              title="تصدير إلى Word"
+              className="h-10 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 hover:border-emerald-500/50 rounded-xl text-xs md:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-[0.98]"
+            >
+              <FileText className="w-4 h-4 text-slate-300" />
+              <span>WORD</span>
+            </button>
 
-              <button
-                onClick={printDocument}
-                title="طباعة / PDF"
-                className="flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>طباعة</span>
-              </button>
-            </div>
+            {/* Button 5: طباعة */}
+            <button
+              onClick={printDocument}
+              title="طباعة المستند / PDF"
+              className="h-10 px-3.5 bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 hover:border-emerald-500/50 rounded-xl text-xs md:text-sm font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-[0.98]"
+            >
+              <Printer className="w-4 h-4 text-emerald-400" />
+              <span>طباعة</span>
+            </button>
           </div>
         </div>
 
@@ -329,10 +328,10 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
               <ArrowDownLeft className="w-4 h-4 text-emerald-400" />
             </div>
             <div className="text-xl md:text-2xl font-bold text-emerald-400 font-mono">
-              {summary.totalIncome.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+              {(summary?.totalIncome ?? 0).toLocaleString()} <span className="text-xs font-normal">ج.م</span>
             </div>
             <div className="text-[11px] text-slate-500 mt-1">
-              نقداً: {summary.cashIncome.toLocaleString()} | بنكي/انستاباي: {summary.bankIncome.toLocaleString()}
+              نقداً: {(summary?.cashIncome ?? 0).toLocaleString()} | بنكي/انستاباي: {(summary?.bankIncome ?? 0).toLocaleString()}
             </div>
           </div>
 
@@ -343,7 +342,7 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
               <ArrowUpRight className="w-4 h-4 text-rose-400" />
             </div>
             <div className="text-xl md:text-2xl font-bold text-rose-400 font-mono">
-              {summary.totalExpenses.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+              {(summary?.totalExpenses ?? 0).toLocaleString()} <span className="text-xs font-normal">ج.م</span>
             </div>
             <div className="text-[11px] text-slate-500 mt-1">
               رسوم سجل، ضرائب، انتقالات وشهادات
@@ -351,15 +350,15 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
           </div>
 
           {/* 3. Net Fees Formula */}
-          <div className="bg-sky-950/20 p-4 rounded-xl border border-sky-800/40 relative overflow-hidden">
+          <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 relative overflow-hidden">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-sky-300 font-bold">صافي أتعاب ورصيد الخزينة</span>
-              <DollarSign className="w-4 h-4 text-sky-400" />
+              <span className="text-xs text-slate-300 font-bold">صافي أتعاب ورصيد الخزينة</span>
+              <DollarSign className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="text-xl md:text-2xl font-bold text-sky-400 font-mono">
-              {summary.netTreasuryBalance.toLocaleString()} <span className="text-xs font-normal">ج.م</span>
+            <div className="text-xl md:text-2xl font-bold text-emerald-400 font-mono">
+              {(summary?.netTreasuryBalance ?? 0).toLocaleString()} <span className="text-xs font-normal">ج.م</span>
             </div>
-            <div className="text-[11px] text-sky-300/80 mt-1">
+            <div className="text-[11px] text-slate-400 mt-1">
               المعادلة: الوارد - المنصرف = الصافي
             </div>
           </div>
@@ -454,13 +453,13 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
 
           <div className="flex items-center gap-4 text-xs font-mono">
             <div className="text-emerald-400">
-              الوارد: <strong>{clientFinancialOverview.totalIncome.toLocaleString()}</strong> ج.م
+              الوارد: <strong>{(clientFinancialOverview?.totalIncome ?? 0).toLocaleString()}</strong> ج.م
             </div>
             <div className="text-rose-400">
-              المنصرف: <strong>{clientFinancialOverview.totalExpenses.toLocaleString()}</strong> ج.م
+              المنصرف: <strong>{(clientFinancialOverview?.totalExpenses ?? 0).toLocaleString()}</strong> ج.م
             </div>
             <div className="text-sky-400 font-bold bg-sky-950/60 px-3 py-1.5 rounded-lg border border-sky-800/40">
-              صافي أتعاب المكتب: <strong>{clientFinancialOverview.netFees.toLocaleString()}</strong> ج.م
+              صافي أتعاب المكتب: <strong>{(clientFinancialOverview?.netFees ?? 0).toLocaleString()}</strong> ج.م
             </div>
           </div>
         </div>
@@ -527,7 +526,7 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
                     {/* Amount */}
                     <td className="p-3.5 font-mono font-bold whitespace-nowrap">
                       <span className={tx.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}>
-                        {tx.type === 'income' ? '+' : '-'} {tx.amount.toLocaleString()} ج.م
+                        {tx.type === 'income' ? '+' : '-'} {(tx.amount || 0).toLocaleString()} ج.م
                       </span>
                     </td>
 
@@ -845,7 +844,7 @@ export const TreasuryFinancialView: React.FC<TreasuryFinancialViewProps> = ({
                   <div className="flex items-baseline gap-2">
                     <span className="font-bold text-slate-700 whitespace-nowrap">مبلغ وقدره:</span>
                     <span className="flex-1 border-b border-dotted border-slate-400 font-bold font-mono text-emerald-800 px-2">
-                      {viewReceiptTx.amount.toLocaleString()} ج.م (فقط وقدره {viewReceiptTx.amount.toLocaleString()} جنيهاً مصرياً لا غير)
+                      {(viewReceiptTx.amount || 0).toLocaleString()} ج.م (فقط وقدره {(viewReceiptTx.amount || 0).toLocaleString()} جنيهاً مصرياً لا غير)
                     </span>
                   </div>
 

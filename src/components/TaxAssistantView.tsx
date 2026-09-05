@@ -187,11 +187,8 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
         <div>
           <h2 className="text-lg font-black text-slate-900 flex items-center gap-2 font-cairo">
             <BadgePercent className="w-5 h-5 text-sky-600" />
-            المستشار الضريبي والنماذج الضريبية المصرية (Egyptian Tax Hub)
+            الضرائب ونموذج 41
           </h2>
-          <p className="text-xs text-slate-500">
-            نماذج الإقرارات (نموذج 10 ق.م، نموذج 41 خصم وتحصيل)، حاسبة كسب العمل، وأجندة الالتزامات الضريبية
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -301,10 +298,10 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
                   <span className="text-[11px] text-slate-500">{salesInvoices.length} فواتير</span>
                 </div>
                 <div className="text-lg font-black text-slate-900 font-mono">
-                  {totalSalesTaxable.toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
+                  {(totalSalesTaxable || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
                 </div>
                 <div className="text-xs font-bold text-sky-700 pt-1 border-t border-slate-200">
-                  ضريبة المخرجات المحصلة: {totalOutputVat.toLocaleString()} ج.م
+                  ضريبة المخرجات المحصلة: {(totalOutputVat || 0).toLocaleString()} ج.م
                 </div>
               </div>
 
@@ -314,10 +311,10 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
                   <span className="text-[11px] text-slate-500">{purchaseInvoices.length} فواتير</span>
                 </div>
                 <div className="text-lg font-black text-slate-900 font-mono">
-                  {totalPurchasesTaxable.toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
+                  {(totalPurchasesTaxable || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
                 </div>
                 <div className="text-xs font-bold text-emerald-700 pt-1 border-t border-slate-200">
-                  ضريبة المدخلات القابلة للخصم: {totalInputVat.toLocaleString()} ج.م
+                  ضريبة المدخلات القابلة للخصم: {(totalInputVat || 0).toLocaleString()} ج.م
                 </div>
               </div>
 
@@ -359,14 +356,14 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
                   <tr>
                     <td className="p-3 text-center font-mono font-bold text-sky-800">01</td>
                     <td className="p-3 font-semibold">مبيعات السلع والخدمات الخاضعة للنسبة العامة 14%</td>
-                    <td className="p-3 text-left font-mono">{totalSalesTaxable.toLocaleString()}</td>
-                    <td className="p-3 text-left font-mono font-bold text-sky-800">{totalOutputVat.toLocaleString()}</td>
+                    <td className="p-3 text-left font-mono">{(totalSalesTaxable || 0).toLocaleString()}</td>
+                    <td className="p-3 text-left font-mono font-bold text-sky-800">{(totalOutputVat || 0).toLocaleString()}</td>
                   </tr>
                   <tr>
                     <td className="p-3 text-center font-mono font-bold text-emerald-800">02</td>
                     <td className="p-3 font-semibold">مشتريات السلع والخدمات المحلية والمستوردة القابلة للخصم</td>
-                    <td className="p-3 text-left font-mono">{totalPurchasesTaxable.toLocaleString()}</td>
-                    <td className="p-3 text-left font-mono font-bold text-emerald-800">({totalInputVat.toLocaleString()})</td>
+                    <td className="p-3 text-left font-mono">{(totalPurchasesTaxable || 0).toLocaleString()}</td>
+                    <td className="p-3 text-left font-mono font-bold text-emerald-800">({(totalInputVat || 0).toLocaleString()})</td>
                   </tr>
                   <tr>
                     <td className="p-3 text-center font-mono font-bold text-slate-600">03</td>
@@ -390,7 +387,7 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
                     </td>
                     <td className="p-3 text-left font-mono">-</td>
                     <td className="p-3 text-left font-mono font-black text-base text-sky-950">
-                      {netVatPayable.toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
+                      {(netVatPayable || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
                     </td>
                   </tr>
                 </tbody>
@@ -575,7 +572,7 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
                 <div className="text-xs text-slate-600 font-semibold">إجمالي الأجور المستحقة (Gross)</div>
                 <div className="text-lg font-black text-slate-900 font-mono">
-                  {totalMonthlyGross.toLocaleString()} ج.م
+                  {(totalMonthlyGross || 0).toLocaleString()} ج.م
                 </div>
                 <div className="text-[11px] text-slate-500">حساب مدين: 411 أجور ومرتبات</div>
               </div>
@@ -583,7 +580,7 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
                 <div className="text-xs text-slate-600 font-semibold">حصة المنشأة في التأمينات (18.75%)</div>
                 <div className="text-lg font-black text-sky-800 font-mono">
-                  {totalMonthlyCompanyInsurance.toLocaleString(undefined, { maximumFractionDigits: 0 })} ج.م
+                  {(totalMonthlyCompanyInsurance || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })} ج.م
                 </div>
                 <div className="text-[11px] text-slate-500">حساب مدين: 412 تأمينات اجتماعية</div>
               </div>
@@ -591,7 +588,7 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
                 <div className="text-xs text-slate-600 font-semibold">ضريبة كسب العمل المستقطعة</div>
                 <div className="text-lg font-black text-amber-800 font-mono">
-                  {totalMonthlySalaryTax.toLocaleString(undefined, { maximumFractionDigits: 0 })} ج.م
+                  {(totalMonthlySalaryTax || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })} ج.م
                 </div>
                 <div className="text-[11px] text-slate-500">حساب دائن: 2322 مصلحة الضرائب</div>
               </div>
@@ -599,7 +596,7 @@ export const TaxAssistantView: React.FC<TaxAssistantViewProps> = ({
               <div className="bg-emerald-50/70 border border-emerald-200 p-4 rounded-xl space-y-1">
                 <div className="text-xs text-emerald-900 font-bold">صافي الأجور المستحقة للصرف (Net)</div>
                 <div className="text-lg font-black text-emerald-950 font-mono">
-                  {netPayableSalaries.toLocaleString(undefined, { maximumFractionDigits: 0 })} ج.م
+                  {(netPayableSalaries || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })} ج.م
                 </div>
                 <div className="text-[11px] text-emerald-800 font-medium">حساب دائن: 2312 رواتب مستحقة</div>
               </div>

@@ -253,10 +253,10 @@ export const SmartEntryModal: React.FC<SmartEntryModalProps> = ({
                             <td className="py-2 px-3 font-semibold text-slate-800">{acc?.name || l.accountCode}</td>
                             <td className="py-2 px-3 text-slate-500 text-[11px]">{l.note}</td>
                             <td className="py-2 px-3 font-mono font-bold text-left text-slate-900">
-                              {l.debit > 0 ? Number(l.debit).toLocaleString() : '-'}
+                              {l.debit > 0 ? (Number(l?.debit) || 0).toLocaleString() : '-'}
                             </td>
                             <td className="py-2 px-3 font-mono font-bold text-left text-slate-700">
-                              {l.credit > 0 ? Number(l.credit).toLocaleString() : '-'}
+                              {l.credit > 0 ? (Number(l?.credit) || 0).toLocaleString() : '-'}
                             </td>
                           </tr>
                         );
@@ -268,10 +268,10 @@ export const SmartEntryModal: React.FC<SmartEntryModalProps> = ({
                           الإجمالي:
                         </td>
                         <td className="py-2.5 px-3 text-left text-sky-700 font-black">
-                          {totalDebit.toLocaleString()} ج.م
+                          {(totalDebit || 0).toLocaleString()} ج.م
                         </td>
                         <td className="py-2.5 px-3 text-left text-slate-900 font-black">
-                          {totalCredit.toLocaleString()} ج.م
+                          {(totalCredit || 0).toLocaleString()} ج.م
                         </td>
                       </tr>
                     </tfoot>

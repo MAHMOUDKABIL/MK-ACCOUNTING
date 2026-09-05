@@ -7,10 +7,12 @@ import {
   BookOpen,
   CheckCircle2,
   Clock,
+  Coins,
   DollarSign,
   FileCheck,
   FolderTree,
   HelpCircle,
+  Layers,
   Plus,
   Receipt,
   Scale,
@@ -37,7 +39,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { AuditorStatement, CompanyProfile, JournalEntry } from '../types/accounting';
+import { DashboardAlerts } from './DashboardAlerts';
+import { DashboardFinancialCharts } from './DashboardFinancialCharts';
+import { AuditorStatement, CompanyProfile, Invoice, JournalEntry, Party } from '../types/accounting';
 
 interface DashboardProps {
   companyProfile: CompanyProfile;
@@ -47,6 +51,8 @@ interface DashboardProps {
   journalEntriesCount?: number;
   invoicesCount?: number;
   partiesCount?: number;
+  invoices?: Invoice[];
+  parties?: Party[];
   journalEntries?: JournalEntry[];
   onNavigate: (tab: string) => void;
   onOpenSmartEntry: () => void;
@@ -61,6 +67,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
   journalEntriesCount = 0,
   invoicesCount = 0,
   partiesCount = 0,
+  invoices = [],
+  parties = [],
   journalEntries = [],
   onNavigate,
   onOpenSmartEntry,
@@ -72,25 +80,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
     workingCapital: 0,
   };
 
-  // Chart data for revenue vs expenses trend
-  const trendData = [
-    { month: 'يناير', revenues: 100000, expenses: 72000, profit: 28000 },
-    { month: 'فبراير', revenues: 125000, expenses: 84000, profit: 41000 },
-    {
-      month: 'مارس (الحالي)',
-      revenues: incomeStatement?.netSales || 140000,
-      expenses: (incomeStatement?.costOfGoodsSold || 0) + (incomeStatement?.operatingExpenses || 0) || 92000,
-      profit: incomeStatement?.netProfitAfterTax || 48000,
-    },
-  ];
-
-  // Asset structure pie data
+  // Asset structure pie data (emerald and teal palette)
   const assetData = [
-    { name: 'أصول ثابتة (صافي)', value: balanceSheet?.netFixedAssets || 0, color: '#0ea5e9' },
-    { name: 'مخزون بضائع', value: balanceSheet?.inventory || 0, color: '#38bdf8' },
-    { name: 'عملاء وأوراق قبض', value: (balanceSheet?.tradeReceivables || 0) + (balanceSheet?.notesReceivable || 0), color: '#64748b' },
-    { name: 'نقدية وبنوك', value: balanceSheet?.cashAndEquivalents || 0, color: '#10b981' },
-    { name: 'أرصدة مدينة أخرى', value: balanceSheet?.prepaidAndOtherDebtors || 0, color: '#f59e0b' },
+    { name: 'أصول ثابتة (صافي)', value: balanceSheet?.netFixedAssets || 0, color: '#10b981' },
+    { name: 'مخزون بضائع', value: balanceSheet?.inventory || 0, color: '#059669' },
+    { name: 'عملاء وأوراق قبض', value: (balanceSheet?.tradeReceivables || 0) + (balanceSheet?.notesReceivable || 0), color: '#0d9488' },
+    { name: 'نقدية وبنوك', value: balanceSheet?.cashAndEquivalents || 0, color: '#38bdf8' },
+    { name: 'أرصدة مدينة أخرى', value: balanceSheet?.prepaidAndOtherDebtors || 0, color: '#64748b' },
   ].filter((item) => item.value > 0);
 
   const formatCurrency = (val: number) => {
@@ -98,127 +94,141 @@ export const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Top Banner: Auditor Verification & Financial Summary */}
-      <div className="relative overflow-hidden rounded-xl bg-slate-900 border border-slate-800 p-6 shadow-sm text-slate-100">
-        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          <div className="space-y-2 max-w-3xl">
+    <div className="space-y-6 pb-12 font-somar">
+      {/* Top Banner: ENTERSOFT Executive Banner */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 p-6 shadow-xl text-slate-100">
+        <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="bg-sky-500/15 text-sky-400 border border-sky-500/30 text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                المعايير المحاسبية المصرية (EAS)
+              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1.5 shadow-2xs">
+                <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                ENTERSOFT 2026
               </span>
-              <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs px-2.5 py-0.5 rounded-full font-semibold">
-                تقرير المراجعة: {auditorStatement?.opinionType === 'unqualified' ? 'رأي غير متحفظ (سليم ومطابق)' : 'متحفظ'}
-              </span>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-slate-400 font-mono">
                 السنة المالية: {companyProfile?.fiscalYearEnd || '2026/12/31'}
               </span>
             </div>
-            <h2 className="text-xl md:text-2xl font-black text-white font-cairo">
-              نظام المحاسبة المالية والمراجعة القانونية
+            <h2 className="text-xl md:text-2xl font-black text-white font-somar tracking-wide">
+              لوحة المؤشرات والتحليل المالي الشامل
             </h2>
-            <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              إعداد واعتماد مراقب الحسابات والمحاسب القانوني{' '}
-              <strong className="text-sky-300">{auditorStatement?.auditorName || 'محمود الباز قابيل'}</strong> - {auditorStatement?.registerNumber || 'س.م.م 44887'}.
-              نظام إلكتروني متكامل للقيود والأستاذ العام وموازين المراجعة والقوائم المالية وفقاً للنظام المحاسبي المصري الموحد.
+            <p className="text-xs text-slate-400">
+              متابعة المركز المالي اللحظي ومؤشرات الربحية والسيولة المتوافقة مع معايير المحاسبة المصرية (EAS)
             </p>
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full lg:w-64 shrink-0">
+            {/* Button 1: عملات وفروق الصرف */}
+            <button
+              onClick={() => onNavigate('currency-revaluation')}
+              className="h-10 w-full flex items-center justify-start gap-2.5 px-4 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl text-xs md:text-sm font-bold border border-slate-700 shadow-xs transition-colors cursor-pointer"
+            >
+              <Coins className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>فروق العملة والتقييم</span>
+            </button>
+
+            {/* Button 2: اقتراح قيد آلي */}
             <button
               onClick={onOpenSmartEntry}
-              className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-xs md:text-sm font-bold px-4 py-2.5 rounded-lg shadow-sm transition-all cursor-pointer"
+              className="h-10 w-full flex items-center justify-start gap-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs md:text-sm font-black shadow-md shadow-emerald-950/30 transition-colors cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-sky-200" />
-              <span>اقتراح قيد آلي</span>
+              <Sparkles className="w-4 h-4 text-emerald-200 shrink-0" />
+              <span>اقتراح قيد آلي بالذكاء</span>
             </button>
+
+            {/* Button 3: فاتورة ضريبية */}
             <button
               onClick={() => onNavigate('invoices')}
-              className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs md:text-sm font-bold px-4 py-2.5 rounded-lg border border-slate-700 transition-all cursor-pointer"
+              className="h-10 w-full flex items-center justify-start gap-2.5 px-4 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl text-xs md:text-sm font-bold border border-slate-700 shadow-xs transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-sky-400" />
-              <span>فاتورة ضريبية 14%</span>
+              <Receipt className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>إصدار فاتورة ضريبية</span>
             </button>
           </div>
         </div>
       </div>
 
+      {/* Due Date Alerts System */}
+      <DashboardAlerts
+        invoices={invoices}
+        parties={parties}
+        onNavigate={onNavigate}
+      />
+
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Total Assets */}
-        <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-xs hover:border-sky-400 transition-colors">
+        <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-xl hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">إجمالي الأصول (الموجودات)</span>
-            <div className="p-2 rounded-lg bg-sky-50 text-sky-600 border border-sky-100">
+            <span className="text-xs font-bold text-slate-400">إجمالي الأصول (الموجودات)</span>
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <Scale className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl md:text-2xl font-black text-slate-900 font-mono">
+            <div className="text-xl md:text-2xl font-black text-white font-mono">
               {formatCurrency(balanceSheet?.totalAssets)}
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
               <span>غير متداولة: {formatCurrency(balanceSheet?.totalNonCurrentAssets)}</span>
-              <span className="text-sky-600 font-semibold">متداولة: {formatCurrency(balanceSheet?.totalCurrentAssets)}</span>
+              <span className="text-emerald-400 font-bold">متداولة: {formatCurrency(balanceSheet?.totalCurrentAssets)}</span>
             </div>
           </div>
         </div>
 
         {/* Card 2: Total Equity */}
-        <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-xs hover:border-sky-400 transition-colors">
+        <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-xl hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">إجمالي حقوق الملكية</span>
-            <div className="p-2 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+            <span className="text-xs font-bold text-slate-400">إجمالي حقوق الملكية</span>
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <Award className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl md:text-2xl font-black text-slate-900 font-mono">
+            <div className="text-xl md:text-2xl font-black text-white font-mono">
               {formatCurrency(balanceSheet?.totalEquity)}
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
               <span>رأس المال: {formatCurrency(balanceSheet?.paidCapital)}</span>
-              <span className="text-slate-700 font-semibold">احتياطيات: {formatCurrency((balanceSheet?.legalReserve || 0) + (balanceSheet?.generalReserve || 0))}</span>
+              <span className="text-emerald-400 font-bold">احتياطيات: {formatCurrency((balanceSheet?.legalReserve || 0) + (balanceSheet?.generalReserve || 0))}</span>
             </div>
           </div>
         </div>
 
         {/* Card 3: Net Revenue */}
-        <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-xs hover:border-sky-400 transition-colors">
+        <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-xl hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">صافي المبيعات والإيرادات</span>
-            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
+            <span className="text-xs font-bold text-slate-400">صافي المبيعات والإيرادات</span>
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl md:text-2xl font-black text-slate-900 font-mono">
+            <div className="text-xl md:text-2xl font-black text-white font-mono">
               {formatCurrency(incomeStatement?.netSales)}
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
               <span>مجمل الربح: {formatCurrency(incomeStatement?.grossProfit)}</span>
-              <span className="text-emerald-600 font-semibold">الهامش: {ratios?.[2]?.formatted || '35%'}</span>
+              <span className="text-emerald-400 font-bold">الهامش: {ratios?.[2]?.formatted || '35%'}</span>
             </div>
           </div>
         </div>
 
         {/* Card 4: Net Profit after tax */}
-        <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-xs hover:border-sky-400 transition-colors">
+        <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-xl hover:border-slate-700 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">صافي أرباح العام بعد الضريبة</span>
-            <div className="p-2 rounded-lg bg-sky-50 text-sky-600 border border-sky-100">
+            <span className="text-xs font-bold text-slate-400">صافي أرباح العام بعد الضريبة</span>
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl md:text-2xl font-black text-sky-600 font-mono">
+            <div className="text-xl md:text-2xl font-black text-white font-mono">
               {formatCurrency(incomeStatement?.netProfitAfterTax)}
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-500">
+            <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
               <span>ضريبة الدخل (22.5%): {formatCurrency(incomeStatement?.corporateIncomeTax)}</span>
-              <span className="text-sky-600 font-semibold">صافي الهامش: {ratios?.[3]?.formatted || '18%'}</span>
+              <span className="text-emerald-400 font-bold">صافي الهامش: {ratios?.[3]?.formatted || '18%'}</span>
             </div>
           </div>
         </div>
@@ -226,44 +236,44 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Secondary Quick Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white border border-slate-200 p-3.5 rounded-lg flex items-center gap-3 shadow-2xs">
-          <div className="p-2 rounded-md bg-slate-100 text-slate-700">
+        <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl flex items-center gap-3 shadow-md hover:border-slate-700">
+          <div className="p-2.5 rounded-lg bg-slate-800 text-emerald-400 border border-slate-700">
             <Wallet className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] text-slate-500">النقدية وما في حكمها</div>
-            <div className="text-sm font-bold text-slate-800 font-mono">{formatCurrency(balanceSheet?.cashAndEquivalents)}</div>
+            <div className="text-[11px] text-slate-400 font-medium">النقدية وما في حكمها</div>
+            <div className="text-sm font-bold text-white font-mono">{formatCurrency(balanceSheet?.cashAndEquivalents)}</div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-3.5 rounded-lg flex items-center gap-3 shadow-2xs">
-          <div className="p-2 rounded-md bg-emerald-50 text-emerald-600">
+        <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl flex items-center gap-3 shadow-md hover:border-slate-700">
+          <div className="p-2.5 rounded-lg bg-slate-800 text-emerald-400 border border-slate-700">
             <ShieldCheck className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] text-slate-500">رأس المال العامل الصافي</div>
-            <div className="text-sm font-bold text-emerald-600 font-mono">{formatCurrency(workingCapital)}</div>
+            <div className="text-[11px] text-slate-400 font-medium">رأس المال العامل الصافي</div>
+            <div className="text-sm font-bold text-white font-mono">{formatCurrency(workingCapital)}</div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-3.5 rounded-lg flex items-center gap-3 shadow-2xs">
-          <div className="p-2 rounded-md bg-sky-50 text-sky-600">
+        <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl flex items-center gap-3 shadow-md hover:border-slate-700">
+          <div className="p-2.5 rounded-lg bg-slate-800 text-emerald-400 border border-slate-700">
             <Scale className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] text-slate-500">نسبة التداول الحالية</div>
-            <div className="text-sm font-bold text-sky-600 font-mono">{ratios?.[0]?.formatted || '1.8:1'}</div>
+            <div className="text-[11px] text-slate-400 font-medium">نسبة التداول الحالية</div>
+            <div className="text-sm font-bold text-white font-mono">{ratios?.[0]?.formatted || '1.8:1'}</div>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 p-3.5 rounded-lg flex items-center gap-3 shadow-2xs">
-          <div className="p-2 rounded-md bg-emerald-50 text-emerald-600">
+        <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-xl flex items-center gap-3 shadow-md hover:border-slate-700">
+          <div className="p-2.5 rounded-lg bg-slate-800 text-emerald-400 border border-slate-700">
             <CheckCircle2 className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[11px] text-slate-500">حالة توازن المركز المالي</div>
-            <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <div className="text-[11px] text-slate-400 font-medium">توازن المركز المالي</div>
+            <div className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               متطابق ومتوازن 100%
             </div>
           </div>
@@ -274,93 +284,64 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <button
           onClick={() => onNavigate('chart-of-accounts')}
-          className="bg-white hover:bg-slate-50 border border-slate-200 p-3 rounded-lg text-right transition-all cursor-pointer shadow-2xs flex items-center justify-between"
+          className="bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-emerald-500/40 p-3.5 rounded-xl text-right transition-all cursor-pointer shadow-md flex items-center justify-between group"
         >
           <div>
-            <span className="text-[11px] text-slate-500">دليل الحسابات</span>
-            <div className="text-base font-bold text-slate-800 font-mono">{accountsCount} حساب</div>
+            <span className="text-[11px] text-slate-400 font-medium">دليل الحسابات</span>
+            <div className="text-base font-bold text-white font-mono">{accountsCount} حساب</div>
           </div>
-          <FolderTree className="w-4 h-4 text-sky-500" />
+          <FolderTree className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 group-hover:scale-110 transition-all" />
         </button>
 
         <button
           onClick={() => onNavigate('journal-entries')}
-          className="bg-white hover:bg-slate-50 border border-slate-200 p-3 rounded-lg text-right transition-all cursor-pointer shadow-2xs flex items-center justify-between"
+          className="bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-emerald-500/40 p-3.5 rounded-xl text-right transition-all cursor-pointer shadow-md flex items-center justify-between group"
         >
           <div>
-            <span className="text-[11px] text-slate-500">قيود اليومية</span>
-            <div className="text-base font-bold text-slate-800 font-mono">{journalEntriesCount} قيد</div>
+            <span className="text-[11px] text-slate-400 font-medium">قيود اليومية</span>
+            <div className="text-base font-bold text-white font-mono">{journalEntriesCount} قيد</div>
           </div>
-          <BookOpen className="w-4 h-4 text-sky-500" />
+          <BookOpen className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 group-hover:scale-110 transition-all" />
         </button>
 
         <button
           onClick={() => onNavigate('invoices')}
-          className="bg-white hover:bg-slate-50 border border-slate-200 p-3 rounded-lg text-right transition-all cursor-pointer shadow-2xs flex items-center justify-between"
+          className="bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-emerald-500/40 p-3.5 rounded-xl text-right transition-all cursor-pointer shadow-md flex items-center justify-between group"
         >
           <div>
-            <span className="text-[11px] text-slate-500">الفواتير الضريبية</span>
-            <div className="text-base font-bold text-slate-800 font-mono">{invoicesCount} فاتورة</div>
+            <span className="text-[11px] text-slate-400 font-medium">الفواتير الضريبية</span>
+            <div className="text-base font-bold text-white font-mono">{invoicesCount} فاتورة</div>
           </div>
-          <Receipt className="w-4 h-4 text-sky-500" />
+          <Receipt className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 group-hover:scale-110 transition-all" />
         </button>
 
         <button
           onClick={() => onNavigate('parties')}
-          className="bg-white hover:bg-slate-50 border border-slate-200 p-3 rounded-lg text-right transition-all cursor-pointer shadow-2xs flex items-center justify-between"
+          className="bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800 hover:border-emerald-500/40 p-3.5 rounded-xl text-right transition-all cursor-pointer shadow-md flex items-center justify-between group"
         >
           <div>
-            <span className="text-[11px] text-slate-500">العملاء والموردين</span>
-            <div className="text-base font-bold text-slate-800 font-mono">{partiesCount} جهة</div>
+            <span className="text-[11px] text-slate-400 font-medium">العملاء والموردين</span>
+            <div className="text-base font-bold text-white font-mono">{partiesCount} جهة</div>
           </div>
-          <Users className="w-4 h-4 text-sky-500" />
+          <Users className="w-4 h-4 text-slate-400 group-hover:text-emerald-400 group-hover:scale-110 transition-all" />
         </button>
       </div>
 
-      {/* Charts Section */}
+      {/* Financial Analytics & Evolution Charts */}
+      <DashboardFinancialCharts
+        financialData={financialData}
+      />
+
+      {/* Charts Section: Asset Structure */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart: Trend */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 p-5 rounded-xl shadow-xs">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 font-cairo">
-                <BarChart3 className="w-4 h-4 text-sky-600" />
-                تطور الإيرادات والمصروفات وصافي الأرباح
-              </h3>
-              <p className="text-xs text-slate-500">مقارنة شهرية للأداء المالي الفعلي للشركة</p>
-            </div>
-            <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md border border-slate-200 font-medium">
-              الربع الأول 2026
-            </span>
-          </div>
-
-          <div className="h-64 w-full" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={trendData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={11} tickFormatter={(val) => `${(val / 1000).toFixed(0)}k`} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '8px', color: '#0f172a', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(val: any) => [`${Number(val).toLocaleString()} ج.م`, '']}
-                />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
-                <Bar dataKey="revenues" name="الإيرادات" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expenses" name="المصروفات والتكلفة" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="profit" name="صافي الربح" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Side Chart: Asset Breakdown */}
-        <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-xs flex flex-col justify-between">
+        {/* Asset Breakdown */}
+        <div className="lg:col-span-1 bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-1 font-cairo">
-              <Scale className="w-4 h-4 text-sky-600" />
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-1 font-somar">
+              <Scale className="w-4 h-4 text-emerald-400" />
               هيكل وتوزيع أصول المنشأة
             </h3>
-            <p className="text-xs text-slate-500 mb-2">توزيع الأصول الثابتة والمتداولة والسيولة</p>
+            <p className="text-xs text-slate-400 mb-2">توزيع الأصول الثابتة والمتداولة والسيولة</p>
           </div>
 
           <div className="h-48 w-full" dir="ltr">
@@ -380,8 +361,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '8px', color: '#0f172a', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(val: any) => [`${Number(val).toLocaleString()} ج.م`, '']}
+                  contentStyle={{ backgroundColor: '#020617', borderColor: '#1e293b', borderRadius: '12px', color: '#ffffff', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.5)' }}
+                  formatter={(val: any) => [`${(Number(val) || 0).toLocaleString()} ج.م`, '']}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -389,107 +370,149 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
           <div className="space-y-1.5 mt-2 text-xs">
             {assetData.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between text-slate-600">
+              <div key={idx} className="flex items-center justify-between text-slate-300">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
                   <span className="truncate">{item.name}</span>
                 </div>
-                <span className="font-mono text-slate-900 font-semibold">{formatCurrency(item.value)}</span>
+                <span className="font-mono text-white font-semibold">{formatCurrency(item.value)}</span>
               </div>
             ))}
           </div>
         </div>
+
+        {/* Quick EAS Accounting Highlights */}
+        <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 to-emerald-950/30 text-white p-6 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 px-3 py-1 rounded-full font-bold">
+                إفصاحات وملاحظات المركز المالي الدوري
+              </span>
+              <span className="text-xs text-slate-400 font-mono">EAS Compliant</span>
+            </div>
+            <h4 className="text-base font-bold font-somar text-white">
+              مطابقة القوائم المالية وفقاً لمعايير المحاسبة المصرية (EAS 1 و EAS 4)
+            </h4>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              يتم احتساب الإهلاك الدوري وفق طريقة القسط الثابت، وإثبات ضريبة القيمة المضافة بمعدل 14%، وضريبة أرباح تجارية وصناعية (الخصم والتحصيل من المنبع) بمعدل 1% أو 3%، مع إعادة تقييم الأرصدة بالعملات الأجنبية وفقاً لمعيار المحاسبة المصري رقم (13) بأسعار إقفال البنك المركزي المصري.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800 mt-4 text-center">
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800">
+              <div className="text-[10px] text-slate-400">معدل كفاية رأس المال</div>
+              <div className="text-sm font-bold text-emerald-300 font-mono">{ratios?.[0]?.formatted || '1.8x'}</div>
+            </div>
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800">
+              <div className="text-[10px] text-slate-400">معدل العائد على الأصول ROA</div>
+              <div className="text-sm font-bold text-emerald-300 font-mono">{ratios?.[4]?.formatted || '12.4%'}</div>
+            </div>
+            <div className="bg-slate-950/50 p-2.5 rounded-xl border border-slate-800">
+              <div className="text-[10px] text-slate-400">العائد على حقوق الملكية ROE</div>
+              <div className="text-sm font-bold text-emerald-300 font-mono">{ratios?.[5]?.formatted || '19.8%'}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Bottom Section: Quick Links & Professional Accounting Guidance */}
+      {/* Bottom Section: Quick Links & Auditor Verification Card */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions & Navigation */}
-        <div className="lg:col-span-2 bg-white border border-slate-200 p-5 rounded-xl shadow-xs">
+        <div className="lg:col-span-2 bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 font-cairo">
-                <BookOpen className="w-4 h-4 text-sky-600" />
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 font-somar">
+                <BookOpen className="w-4 h-4 text-emerald-400" />
                 الوصول السريع للأدوات والقوائم المالية
               </h3>
-              <p className="text-xs text-slate-500">تنقل فوري بين التقارير والمستندات المحاسبية</p>
+              <p className="text-xs text-slate-400">تنقل فوري بين التقارير والمستندات المحاسبية</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={() => onNavigate('financial-statements')}
-              className="p-3.5 rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50/30 text-right transition-all cursor-pointer flex items-center justify-between group"
+              className="p-3.5 rounded-xl border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/60 text-right transition-colors cursor-pointer flex items-center justify-between group"
             >
               <div>
-                <h4 className="text-xs font-bold text-slate-800 group-hover:text-sky-700">القوائم المالية والحسابات الختامية</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">قائمة المركز المالي، الدخل، التدفقات النقدية</p>
+                <h4 className="text-xs font-bold text-white group-hover:text-emerald-300">القوائم المالية والحسابات الختامية</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">قائمة المركز المالي، الدخل، التدفقات النقدية</p>
               </div>
-              <BarChart3 className="w-5 h-5 text-slate-400 group-hover:text-sky-600" />
+              <BarChart3 className="w-5 h-5 text-slate-400 group-hover:text-emerald-400" />
             </button>
 
             <button
               onClick={() => onNavigate('trial-balance')}
-              className="p-3.5 rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50/30 text-right transition-all cursor-pointer flex items-center justify-between group"
+              className="p-3.5 rounded-xl border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/60 text-right transition-colors cursor-pointer flex items-center justify-between group"
             >
               <div>
-                <h4 className="text-xs font-bold text-slate-800 group-hover:text-sky-700">ميزان المراجعة بالأرصدة</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">التحقق من توازن الأرصدة المدينة والدائنة</p>
+                <h4 className="text-xs font-bold text-white group-hover:text-emerald-300">ميزان المراجعة بالأرصدة</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">التحقق من توازن الأرصدة المدينة والدائنة</p>
               </div>
-              <Scale className="w-5 h-5 text-slate-400 group-hover:text-sky-600" />
+              <Scale className="w-5 h-5 text-slate-400 group-hover:text-emerald-400" />
             </button>
 
             <button
               onClick={() => onNavigate('general-ledger')}
-              className="p-3.5 rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50/30 text-right transition-all cursor-pointer flex items-center justify-between group"
+              className="p-3.5 rounded-xl border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/60 text-right transition-colors cursor-pointer flex items-center justify-between group"
             >
               <div>
-                <h4 className="text-xs font-bold text-slate-800 group-hover:text-sky-700">دفتر الأستاذ العام</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">كشوف حسابات تفصيلية ورصيد تراكمي</p>
+                <h4 className="text-xs font-bold text-white group-hover:text-emerald-300">دفتر الأستاذ العام</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">كشوف حسابات تفصيلية ورصيد تراكمي</p>
               </div>
-              <BookOpen className="w-5 h-5 text-slate-400 group-hover:text-sky-600" />
+              <BookOpen className="w-5 h-5 text-slate-400 group-hover:text-emerald-400" />
             </button>
 
             <button
               onClick={() => onNavigate('settings')}
-              className="p-3.5 rounded-lg border border-slate-200 hover:border-sky-500 hover:bg-sky-50/30 text-right transition-all cursor-pointer flex items-center justify-between group"
+              className="p-3.5 rounded-xl border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/60 text-right transition-colors cursor-pointer flex items-center justify-between group"
             >
               <div>
-                <h4 className="text-xs font-bold text-slate-800 group-hover:text-sky-700">نسخ احتياطي واستيراد أكسس</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">تصدير قاعدة البيانات وتعديل بيانات المنشأة</p>
+                <h4 className="text-xs font-bold text-white group-hover:text-emerald-300">نسخ احتياطي واستيراد أكسس</h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">تصدير قاعدة البيانات وتعديل بيانات المنشأة</p>
               </div>
-              <FolderTree className="w-5 h-5 text-slate-400 group-hover:text-sky-600" />
+              <FolderTree className="w-5 h-5 text-slate-400 group-hover:text-emerald-400" />
             </button>
           </div>
         </div>
 
-        {/* Auditor Box */}
-        <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-xs flex flex-col justify-between space-y-4">
+        {/* Auditor Box with Signature & Stamp Preview */}
+        <div className="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between space-y-4">
           <div className="space-y-3">
-            <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-              <Award className="w-5 h-5 text-sky-600" />
+            <div className="flex items-center gap-2 text-white font-bold text-sm">
+              <Award className="w-5 h-5 text-emerald-400" />
               <span>بطاقة مراقب الحسابات المستقل</span>
             </div>
 
-            <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-1.5 text-xs">
-              <div className="font-bold text-slate-900 text-sm">{auditorStatement?.auditorName || 'محمود الباز قابيل'}</div>
-              <div className="text-sky-600 font-semibold">{auditorStatement?.auditorTitle || 'محاسب ومراجع قانوني'}</div>
-              <div className="text-slate-600">{auditorStatement?.firmName || 'مكتب الباز للمحاسبة والمراجعة والاستشارات الضريبية'}</div>
-              <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-slate-500 font-mono text-[11px]">
+            <div className="bg-slate-950/70 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="font-bold text-white text-sm">{auditorStatement?.auditorName || 'محمود الباز قابيل'}</div>
+                  <div className="text-emerald-400 font-medium">{auditorStatement?.auditorTitle || 'محاسب ومراجع قانوني'}</div>
+                  <div className="text-slate-400">{auditorStatement?.firmName || 'مكتب الباز للمحاسبة والمراجعة والاستشارات الضريبية'}</div>
+                </div>
+
+                <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] px-2.5 py-1 rounded-lg font-bold">
+                  معتمد مهنياً
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-slate-400 font-mono text-[11px]">
                 <span>رقم القيد: {auditorStatement?.registerNumber || 'س.م.م 44887'}</span>
-                <span className="text-slate-700 font-semibold">القاهرة - مصر</span>
+                <span className="text-slate-300 font-semibold">القاهرة - مصر</span>
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-400 leading-relaxed">
               تم فحص ومراجعة العمليات المحاسبية وفقاً لمعايير المحاسبة المصرية (EAS) وقانون الشركات 159 لسنة 1981.
             </p>
           </div>
 
           <button
             onClick={() => onNavigate('auditor-report')}
-            className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-lg shadow-sm transition-all text-center cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-950/40 transition-colors text-center cursor-pointer flex items-center justify-center gap-1.5 font-somar"
           >
-            <FileCheck className="w-4 h-4 text-sky-100" />
+            <FileCheck className="w-4 h-4 text-emerald-100" />
             <span>عرض واعتماد تقرير مراقب الحسابات</span>
           </button>
         </div>

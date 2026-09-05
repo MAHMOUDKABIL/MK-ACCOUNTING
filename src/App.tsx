@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { AuditorReportView } from './components/AuditorReportView';
+import { AuditLogView } from './components/AuditLogView';
 import { BankReconciliationView } from './components/BankReconciliationView';
 import { CertificatesManagementView } from './components/CertificatesManagementView';
 import { ChartOfAccountsView } from './components/ChartOfAccountsView';
 import { ClientsArchiveView } from './components/ClientsArchiveView';
 import { Dashboard } from './components/Dashboard';
 import { EInvoiceETAView } from './components/EInvoiceETAView';
+import { FinancialAnalysisView } from './components/FinancialAnalysisView';
+import { FinancialScenarioStudioView } from './components/FinancialScenarioStudioView';
 import { FinancialStatementsView } from './components/FinancialStatementsView';
+import { FixedAssetsView } from './components/FixedAssetsView';
 import { GeneralLedgerView } from './components/GeneralLedgerView';
 import { Header } from './components/Header';
 import { InvoicesView } from './components/InvoicesView';
@@ -20,6 +24,9 @@ import { TaxAssistantView } from './components/TaxAssistantView';
 import { TreasuryFinancialView } from './components/TreasuryFinancialView';
 import { TrialBalanceView } from './components/TrialBalanceView';
 import { YearEndClosingModal } from './components/YearEndClosingModal';
+import { MobileBottomNavigation } from './components/MobileBottomNavigation';
+import { KPIDashboardView } from './components/KPIDashboardView';
+import { CertificateVerificationCenterModal } from './components/CertificateVerificationCenterModal';
 import { db } from './services/db';
 import {
   Account,
@@ -38,6 +45,9 @@ export default function App() {
   const [isSmartEntryModalOpen, setIsSmartEntryModalOpen] = useState(false);
   const [isOpeningBalancesModalOpen, setIsOpeningBalancesModalOpen] = useState(false);
   const [isYearEndClosingModalOpen, setIsYearEndClosingModalOpen] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isVerificationCenterOpen, setIsVerificationCenterOpen] = useState(false);
+  const [verificationInitialSerial, setVerificationInitialSerial] = useState('');
 
   // Core Database States
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -79,6 +89,18 @@ export default function App() {
 
   useEffect(() => {
     refreshDatabase();
+
+    // Check if the URL was opened by scanning a certificate's QR code
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const verifyCertParam = params.get('verifyCert') || params.get('serial') || params.get('cert');
+      if (verifyCertParam) {
+        setVerificationInitialSerial(verifyCertParam.trim());
+        setIsVerificationCenterOpen(true);
+      }
+    } catch (e) {
+      console.error('Error parsing certificate verification URL query:', e);
+    }
   }, []);
 
   // Handlers for Accounts
@@ -188,7 +210,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ELBAZ_Accounting_DB_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `ENTERSOFT_Accounting_DB_Backup_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
   };
 
@@ -233,7 +255,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] text-[#334155] flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-zinc-700 selection:text-white relative">
       {/* Top Professional Auditor Ribbon Header */}
       <Header
         companyProfile={companyProfile}
@@ -244,27 +266,75 @@ export default function App() {
       />
 
       {/* Main Layout Body */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Navigation Sidebar */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Navigation Sidebar (Desktop view, hidden on mobile / small devices) */}
+        <div className="hidden lg:block shrink-0">
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
+
+        {/* Mobile Drawer (When user taps "الأقسام" on small screens) */}
+        {isMobileDrawerOpen && (
+          <div className="fixed inset-0 z-50 flex lg:hidden">
+            <div
+              className="fixed inset-0 bg-black/75 backdrop-blur-xs transition-opacity"
+              onClick={() => setIsMobileDrawerOpen(false)}
+            />
+            <div className="relative w-72 max-w-[85%] bg-slate-950 h-full shadow-2xl flex flex-col z-10 border-l border-slate-800">
+              <div className="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+                <span className="text-sm font-bold text-white font-somar">أقسام المحاسبة والنظام</span>
+                <button
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="text-slate-400 hover:text-white p-1 rounded-lg text-sm font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <Sidebar
+                  activeTab={activeTab}
+                  setActiveTab={(tab) => {
+                    setActiveTab(tab);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Dynamic Viewport Container */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-[#f1f5f9]">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* 1. Dashboard View */}
-            {activeTab === 'dashboard' && financialData && (
-              <Dashboard
-                financialData={financialData}
-                companyProfile={companyProfile}
-                auditorStatement={auditorStatement}
-                accountsCount={accounts.length}
-                journalEntriesCount={journalEntries.length}
-                invoicesCount={invoices.length}
-                partiesCount={parties.length}
-                onOpenSmartEntry={() => setIsSmartEntryModalOpen(true)}
-                onNavigate={setActiveTab}
-              />
-            )}
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 lg:p-8 bg-slate-950 text-slate-100 font-somar pb-24 lg:pb-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+              {/* 1. Dashboard View */}
+              {activeTab === 'dashboard' && financialData && (
+                <Dashboard
+                  financialData={financialData}
+                  companyProfile={companyProfile}
+                  auditorStatement={auditorStatement}
+                  accountsCount={accounts.length}
+                  journalEntriesCount={journalEntries.length}
+                  invoicesCount={invoices.length}
+                  partiesCount={parties.length}
+                  invoices={invoices}
+                  parties={parties}
+                  journalEntries={journalEntries}
+                  onOpenSmartEntry={() => setIsSmartEntryModalOpen(true)}
+                  onNavigate={setActiveTab}
+                />
+              )}
+
+              {/* KPI Dashboard View (Recharts) */}
+              {activeTab === 'kpi-dashboard' && financialData && (
+                <KPIDashboardView
+                  financialData={financialData}
+                  companyProfile={companyProfile}
+                  auditorStatement={auditorStatement}
+                  onNavigate={setActiveTab}
+                />
+              )}
 
             {/* Office Clients Archive */}
             {activeTab === 'clients-archive' && (
@@ -332,6 +402,14 @@ export default function App() {
               />
             )}
 
+            {/* Fixed Assets Management & Periodic Depreciation */}
+            {activeTab === 'fixed-assets' && (
+              <FixedAssetsView
+                accounts={accounts}
+                onNavigateToJournal={() => setActiveTab('journal-entries')}
+              />
+            )}
+
             {/* 4. General Ledger View */}
             {activeTab === 'general-ledger' && (
               <GeneralLedgerView
@@ -348,6 +426,19 @@ export default function App() {
                 trialBalanceData={trialBalanceData}
                 companyProfile={companyProfile}
               />
+            )}
+
+            {/* Autonomous Scenario-Based Financial Statements Studio */}
+            {activeTab === 'financial-scenario-builder' && (
+              <FinancialScenarioStudioView
+                companyProfile={companyProfile}
+                auditorStatement={auditorStatement}
+              />
+            )}
+
+            {/* Advanced Financial Analysis & Multi-Year Ratios */}
+            {activeTab === 'financial-analysis' && (
+              <FinancialAnalysisView />
             )}
 
             {/* 6. Financial Statements View */}
@@ -414,7 +505,12 @@ export default function App() {
               />
             )}
 
-            {/* 12. Settings & Database Backup/Restore */}
+            {/* 12. Audit Logs & System Activity Trail */}
+            {activeTab === 'audit-logs' && (
+              <AuditLogView onRefresh={refreshDatabase} />
+            )}
+
+            {/* 13. Settings & Database Backup/Restore */}
             {activeTab === 'settings' && (
               <SettingsView
                 companyProfile={companyProfile}
@@ -430,6 +526,14 @@ export default function App() {
           </div>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation Bar (Persistent on Phone & Mobile Frame) */}
+      <MobileBottomNavigation
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        onToggleMobileDrawer={() => setIsMobileDrawerOpen(true)}
+        onOpenInstallModal={() => {}}
+      />
 
       {/* Smart Automated Journal Entry Modal */}
       <SmartEntryModal
@@ -455,6 +559,15 @@ export default function App() {
         companyProfile={companyProfile}
         auditorStatement={auditorStatement}
         onExecuteClosing={handleExecuteYearEndClosing}
+      />
+
+      {/* Certificate Verification Center Modal (accessible globally via QR or link) */}
+      <CertificateVerificationCenterModal
+        isOpen={isVerificationCenterOpen}
+        onClose={() => setIsVerificationCenterOpen(false)}
+        initialSerial={verificationInitialSerial}
+        companyProfile={companyProfile}
+        auditorStatement={auditorStatement}
       />
     </div>
   );

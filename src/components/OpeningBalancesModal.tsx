@@ -105,7 +105,7 @@ export const OpeningBalancesModal: React.FC<OpeningBalancesModalProps> = ({
     if (!isBalanced && createOpeningEntry) {
       if (
         !window.confirm(
-          `القيد الافتتاحي غير متوازن! يوجد فارق قدره (${difference.toLocaleString()} ج.م).\nهل تريد المتابعة وحفظ الأرصدة بدون توليد قيد افتتاحي؟`
+          `القيد الافتتاحي غير متوازن! يوجد فارق قدره (${(difference || 0).toLocaleString()} ج.م).\nهل تريد المتابعة وحفظ الأرصدة بدون توليد قيد افتتاحي؟`
         )
       ) {
         return;
@@ -156,13 +156,13 @@ export const OpeningBalancesModal: React.FC<OpeningBalancesModalProps> = ({
           <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
             <span className="text-slate-500 font-medium">إجمالي الأرصدة المدينة</span>
             <div className="text-base font-bold text-sky-950 font-mono">
-              {totalDebit.toLocaleString()} ج.م
+              {(totalDebit || 0).toLocaleString()} ج.م
             </div>
           </div>
           <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
             <span className="text-slate-500 font-medium">إجمالي الأرصدة الدائنة</span>
             <div className="text-base font-bold text-sky-950 font-mono">
-              {totalCredit.toLocaleString()} ج.م
+              {(totalCredit || 0).toLocaleString()} ج.م
             </div>
           </div>
           <div
@@ -174,7 +174,7 @@ export const OpeningBalancesModal: React.FC<OpeningBalancesModalProps> = ({
           >
             <span className="font-medium">الفارق (حالة التوازن)</span>
             <div className="text-base font-bold font-mono">
-              {difference.toLocaleString()} ج.م
+              {(difference || 0).toLocaleString()} ج.م
             </div>
           </div>
           <div className="flex items-center justify-center p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">

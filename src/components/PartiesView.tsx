@@ -144,11 +144,8 @@ export const PartiesView: React.FC<PartiesViewProps> = ({
         <div>
           <h2 className="text-lg font-black text-slate-900 flex items-center gap-2 font-cairo">
             <Users className="w-5 h-5 text-sky-600" />
-            إدارة حسابات العملاء والموردين (Accounts Receivable & Payable)
+            العملاء والموردين
           </h2>
-          <p className="text-xs text-slate-500">
-            ملفات العملاء والموردين، حدود الائتمان، الأرقام الضريبية، ومتابعة الأرصدة المستحقة
-          </p>
         </div>
 
         <div className="flex items-center flex-wrap gap-2">
@@ -157,7 +154,7 @@ export const PartiesView: React.FC<PartiesViewProps> = ({
             className="flex items-center gap-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition-colors cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>{activeTab === 'customer' ? 'إضافة عميل جديد' : 'إضافة مورد جديد'}</span>
+            <span>{activeTab === 'customer' ? 'إضافة عميل' : 'إضافة مورد'}</span>
           </button>
         </div>
       </div>

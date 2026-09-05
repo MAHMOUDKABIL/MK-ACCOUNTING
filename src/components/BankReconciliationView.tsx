@@ -117,11 +117,8 @@ export const BankReconciliationView: React.FC<BankReconciliationViewProps> = ({
         <div>
           <h2 className="text-lg font-black text-slate-900 flex items-center gap-2 font-cairo">
             <Landmark className="w-5 h-5 text-sky-600" />
-            مذكرة تسوية البنك والخزينة (Bank & Cash Reconciliation)
+            تسوية البنك
           </h2>
-          <p className="text-xs text-slate-500">
-            مطابقة رصيد كشف الحساب البنكي الفعلي مع رصيد الأستاذ العام والدفاتر المحاسبية
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -271,14 +268,14 @@ export const BankReconciliationView: React.FC<BankReconciliationViewProps> = ({
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
             <div className="text-xs text-slate-600 font-semibold">رصيد كشف حساب البنك المعدل</div>
             <div className="text-base font-bold text-slate-900 font-mono">
-              {adjustedBankBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
+              {(adjustedBankBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
             </div>
           </div>
 
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
             <div className="text-xs text-slate-600 font-semibold">الرصيد الدفتري المعدل (الأستاذ العام)</div>
             <div className="text-base font-bold text-slate-900 font-mono">
-              {adjustedBookBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
+              {(adjustedBookBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
             </div>
           </div>
 
@@ -294,7 +291,7 @@ export const BankReconciliationView: React.FC<BankReconciliationViewProps> = ({
               <span>{isReconciled ? 'المطابقة صحيحة (فارق = 0)' : 'يوجد فارق غير مطابق'}</span>
             </div>
             <div className="text-base font-bold font-mono">
-              فارق: {variance.toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
+              فارق: {(variance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })} ج.م
             </div>
           </div>
         </div>
@@ -309,20 +306,20 @@ export const BankReconciliationView: React.FC<BankReconciliationViewProps> = ({
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 font-bold text-slate-900">
                 <span>رصيد كشف حساب البنك في {statementDate}</span>
-                <span className="font-mono">{bankStatementBalance.toLocaleString()} ج.م</span>
+                <span className="font-mono">{(bankStatementBalance || 0).toLocaleString()} ج.م</span>
               </div>
 
               {/* Add deposits in transit */}
               <div className="space-y-1.5">
                 <div className="font-bold text-emerald-800 flex items-center justify-between">
                   <span>يضاف (+): إيداعات بالطريق لم تظهر بالبنك</span>
-                  <span className="font-mono">+{totalDepositsInTransit.toLocaleString()}</span>
+                  <span className="font-mono">+{(totalDepositsInTransit || 0).toLocaleString()}</span>
                 </div>
                 {depositsInTransit.map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-slate-600 pr-3 text-[11px]">
                     <span>• {item.description}</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono">{item.amount.toLocaleString()}</span>
+                      <span className="font-mono">{(item.amount || 0).toLocaleString()}</span>
                       <button
                         onClick={() => removeItem(item.id, 'deposit')}
                         className="text-rose-500 hover:text-rose-700 no-print"
@@ -338,13 +335,13 @@ export const BankReconciliationView: React.FC<BankReconciliationViewProps> = ({
               <div className="space-y-1.5 pt-2 border-t border-slate-100">
                 <div className="font-bold text-rose-800 flex items-center justify-between">
                   <span>يخصم (-): شيكات صادرة لم تقدم للصرف</span>
-                  <span className="font-mono">-{totalOutstandingChecks.toLocaleString()}</span>
+                  <span className="font-mono">-{(totalOutstandingChecks || 0).toLocaleString()}</span>
                 </div>
                 {outstandingChecks.map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-slate-600 pr-3 text-[11px]">
                     <span>• {item.description}</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono">{item.amount.toLocaleString()}</span>
+                      <span className="font-mono">{(item.amount || 0).toLocaleString()}</span>
                       <button
                         onClick={() => removeItem(item.id, 'check')}
                         className="text-rose-500 hover:text-rose-700 no-print"
@@ -359,7 +356,7 @@ export const BankReconciliationView: React.FC<BankReconciliationViewProps> = ({
               {/* Adjusted Bank Balance Result */}
               <div className="pt-3 border-t-2 border-slate-300 flex items-center justify-between font-bold text-slate-900 bg-slate-50 p-2 rounded">
                 <span>رصيد البنك المعدل والصحيح</span>
-                <span className="font-mono text-sm">{adjustedBankBalance.toLocaleString()} ج.م</span>
+                <span className="font-mono text-sm">{(adjustedBankBalance || 0).toLocaleString()} ج.م</span>
               </div>
             </div>
           </div>
@@ -372,20 +369,20 @@ export const BankReconciliationView: React.FC<BankReconciliationViewProps> = ({
             <div className="p-4 space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 font-bold text-slate-900">
                 <span>الرصيد الدفتري بحساب ({selectedAccount?.code})</span>
-                <span className="font-mono">{bookBalance.toLocaleString()} ج.م</span>
+                <span className="font-mono">{(bookBalance || 0).toLocaleString()} ج.م</span>
               </div>
 
               {/* Bank Charges */}
               <div className="space-y-1.5">
                 <div className="font-bold text-rose-800 flex items-center justify-between">
                   <span>يخصم (-): مصروفات وعمولات بنكية لم تقيد</span>
-                  <span className="font-mono">-{totalBankCharges.toLocaleString()}</span>
+                  <span className="font-mono">-{(totalBankCharges || 0).toLocaleString()}</span>
                 </div>
                 {bankAdjustments.map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-slate-600 pr-3 text-[11px]">
                     <span>• {item.description}</span>
                     <div className="flex items-center gap-2">
-                      <span className="font-mono">{item.amount.toLocaleString()}</span>
+                      <span className="font-mono">{(item.amount || 0).toLocaleString()}</span>
                       <button
                         onClick={() => removeItem(item.id, 'charge')}
                         className="text-rose-500 hover:text-rose-700 no-print"
@@ -400,7 +397,7 @@ export const BankReconciliationView: React.FC<BankReconciliationViewProps> = ({
               {/* Adjusted Book Balance Result */}
               <div className="pt-3 border-t-2 border-slate-300 flex items-center justify-between font-bold text-slate-900 bg-slate-50 p-2 rounded mt-8">
                 <span>الرصيد الدفتري المعدل والمطابق</span>
-                <span className="font-mono text-sm">{adjustedBookBalance.toLocaleString()} ج.م</span>
+                <span className="font-mono text-sm">{(adjustedBookBalance || 0).toLocaleString()} ج.م</span>
               </div>
             </div>
           </div>

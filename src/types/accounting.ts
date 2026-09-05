@@ -18,6 +18,8 @@ export interface Account {
   currentDebit?: number;
   currentCredit?: number;
   currentBalance?: number;
+  currency?: string; // e.g. 'EGP', 'USD', 'EUR'
+  foreignOpeningBalance?: number;
   description?: string;
   isActive: boolean;
   isSystem?: boolean;
@@ -30,6 +32,10 @@ export interface JournalEntryLine {
   accountName: string;
   debit: number;
   credit: number;
+  currency?: string; // رمز العملة مثل 'USD'
+  exchangeRate?: number; // سعر الصرف مقابل الجنيه المصري
+  foreignDebit?: number; // المبلغ المدين بالعملة الأجنبية
+  foreignCredit?: number; // المبلغ الدائن بالعملة الأجنبية
   note?: string;
   costCenter?: string;
 }
@@ -44,6 +50,8 @@ export interface JournalEntry {
   lines: JournalEntryLine[];
   totalDebit: number;
   totalCredit: number;
+  currency?: string; // العملة الأساسية للقيد (افتراضياً EGP)
+  exchangeRate?: number;
   isPosted: boolean;
   postedAt?: string;
   postedBy?: string;
@@ -118,6 +126,10 @@ export interface Invoice {
   status?: string;
   paidAmount?: number;
   remainingAmount?: number;
+  currency?: string; // e.g. 'EGP', 'USD', 'EUR', 'SAR'
+  exchangeRate?: number; // سعر الصرف مقابل الجنيه المصري
+  foreignTotalAmount?: number; // إجمالي الفاتورة بالعملة الأجنبية
+  foreignRemainingAmount?: number; // المتبقي بالعملة الأجنبية
   journalEntryId?: string;
   notes?: string;
   paymentTerms?: string;
@@ -172,6 +184,9 @@ export interface AuditorStatement {
   auditorResponsibilities?: string;
   legalRequirementsParagraph?: string;
   otherLegalRequirements?: string;
+  auditorSignature?: string; // Base64 digital signature image (drawn or uploaded)
+  auditorStamp?: string; // Base64 official seal/stamp image
+  officeLogo?: string; // Base64 office logo image
 }
 
 export interface CompanyProfile {
@@ -193,4 +208,37 @@ export interface CompanyProfile {
   fiscalYearEnd: string;
   auditorName?: string;
   auditorTitle?: string;
+  auditorSignature?: string;
+  auditorStamp?: string;
+  logo?: string;
 }
+
+export type AuditActionType =
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'post'
+  | 'unpost'
+  | 'export'
+  | 'import'
+  | 'closing'
+  | 'backup'
+  | 'restore'
+  | 'setting_change';
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string; // ISO string
+  formattedDate: string; // e.g. "2026-09-02 12:45:10"
+  actionType: AuditActionType;
+  module: string; // e.g. 'قيود اليومية', 'دليل الحسابات', 'الشهادات', 'أرشيف العملاء', 'خزينة المكتب', 'الفواتير', 'القوائم المالية'
+  description: string;
+  recordIdentifier?: string; // e.g. "JV-2026-0004" or "CERT-2026-0001"
+  user: string; // e.g. "المحاسب القانوني / محمود الباز قابيل"
+  details?: string;
+  isDeleted: boolean; // Soft delete by user
+  deletedAt?: string;
+  deletedBy?: string;
+  deletionNote?: string;
+}
+

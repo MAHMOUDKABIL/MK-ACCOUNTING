@@ -2,20 +2,24 @@
 
 @layer base {
   body {
-    font-family: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Somar Sans', 'Somar', 'IBM Plex Sans Arabic', 'Cairo', 'Tajawal', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 }
 
-.font-amiri {
-  font-family: 'Amiri', serif;
+.font-somar {
+  font-family: 'Somar Sans', 'Somar', 'IBM Plex Sans Arabic', 'Cairo', sans-serif;
 }
 
 .font-cairo {
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Cairo', 'Somar Sans', sans-serif;
 }
 
 .font-tajawal {
-  font-family: 'Tajawal', sans-serif;
+  font-family: 'Tajawal', 'Somar Sans', sans-serif;
+}
+
+.font-plex {
+  font-family: 'IBM Plex Sans Arabic', 'Somar Sans', sans-serif;
 }
 
 /* Custom scrollbar for sleek desktop app aesthetic */
@@ -25,30 +29,96 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #090d16;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #334155;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #475569;
 }
 
 @media print {
   @page {
     size: A4 portrait;
-    margin: 10mm 15mm;
+    margin: 8mm 10mm;
   }
 
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html,
   body {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
-    color: black !important;
+    color: #09090b !important;
+    overflow: visible !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    font-family: 'Somar Sans', 'Somar', 'IBM Plex Sans Arabic', 'Cairo', sans-serif !important;
   }
 
-  .no-print {
+  /* CRITICAL: When an A4 Report Modal or Certificate Preview is active,
+     completely hide the entire application root (#root) and background page so ONLY the official A4 document is printed! */
+  body.a4-modal-open #root,
+  body.a4-modal-open > #root,
+  body:has(#print-modal-portal) #root,
+  body:has(#print-modal-portal) > #root,
+  body:has(.print-a4-container) #root {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  body.a4-modal-open #print-modal-portal,
+  body:has(#print-modal-portal) #print-modal-portal {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  #print-modal-portal,
+  #print-modal-portal * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #print-modal-portal [style*="transform"],
+  #print-modal-portal [class*="transform"] {
+    transform: none !important;
+  }
+
+  /* Completely hide all system UI, navigations, sidebars, headers, and buttons */
+  .no-print,
+  nav,
+  aside,
+  header,
+  footer,
+  button,
+  input,
+  select,
+  .no-print-area {
     display: none !important;
   }
 
@@ -56,10 +126,121 @@
     display: block !important;
   }
 
-  .print-card {
-    background: white !important;
-    color: black !important;
+  /* Force print containers to fit within A4 width seamlessly without clipping or spilling over */
+  .print-a4-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: none !important;
     box-shadow: none !important;
-    border: 1px solid #ddd !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #09090b !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  /* Prevent awkward page cuts across rows and elements */
+  tr,
+  .avoid-break,
+  .print-avoid-break,
+  .print-break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Multi-page continuous table support */
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tfoot {
+    display: table-footer-group !important;
+  }
+
+  th,
+  td {
+    word-break: break-word !important;
+  }
+
+  .print-page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+
+  /* When printing directly from general screens without modal:
+     ensure dark cards, panels, and text are cleanly converted to crisp white print paper */
+  body:not(.a4-modal-open) [class*="bg-slate-"],
+  body:not(.a4-modal-open) [class*="bg-zinc-"],
+  body:not(.a4-modal-open) [class*="bg-black"],
+  body:not(.a4-modal-open) [class*="bg-neutral-"],
+  body:not(.a4-modal-open) [class*="bg-gray-"],
+  body:not(.a4-modal-open) .bg-slate-800,
+  body:not(.a4-modal-open) .bg-slate-900,
+  body:not(.a4-modal-open) .bg-slate-950,
+  body:not(.a4-modal-open) .bg-zinc-800,
+  body:not(.a4-modal-open) .bg-zinc-900,
+  body:not(.a4-modal-open) .bg-zinc-950,
+  body:not(.a4-modal-open) .bg-black {
+    background-color: #ffffff !important;
+    color: #09090b !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: none !important;
+  }
+
+  body:not(.a4-modal-open) [class*="text-slate-1"],
+  body:not(.a4-modal-open) [class*="text-slate-2"],
+  body:not(.a4-modal-open) [class*="text-slate-3"],
+  body:not(.a4-modal-open) [class*="text-slate-4"],
+  body:not(.a4-modal-open) [class*="text-zinc-1"],
+  body:not(.a4-modal-open) [class*="text-zinc-2"],
+  body:not(.a4-modal-open) [class*="text-zinc-3"],
+  body:not(.a4-modal-open) [class*="text-zinc-4"],
+  body:not(.a4-modal-open) .text-white,
+  body:not(.a4-modal-open) .text-slate-100,
+  body:not(.a4-modal-open) .text-slate-200,
+  body:not(.a4-modal-open) .text-slate-300,
+  body:not(.a4-modal-open) .text-zinc-100,
+  body:not(.a4-modal-open) .text-zinc-200,
+  body:not(.a4-modal-open) .text-zinc-300 {
+    color: #09090b !important;
+  }
+
+  body:not(.a4-modal-open) [class*="border-slate-"],
+  body:not(.a4-modal-open) [class*="border-zinc-"],
+  body:not(.a4-modal-open) .border-slate-800,
+  body:not(.a4-modal-open) .border-slate-700,
+  body:not(.a4-modal-open) .border-zinc-800,
+  body:not(.a4-modal-open) .border-zinc-700 {
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Document body font standard (13px) and title standard (16px) */
+  .doc-body-text {
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+  }
+
+  .doc-title-text {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    line-height: 1.4 !important;
+  }
+
+  /* First page letterhead in print mode */
+  .print-first-page-letterhead {
+    position: relative !important;
+    background: white !important;
   }
 }

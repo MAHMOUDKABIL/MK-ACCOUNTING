@@ -60,7 +60,7 @@ export const YearEndClosingModal: React.FC<YearEndClosingModalProps> = ({
       !window.confirm(
         `هل أنت متأكد من تنفيذ قيد إقفال السنة المالية لتاريخ ${closingDate}؟\nسيتم إقفال كافة حسابات الإيرادات والمصروفات وترحيل صافي ${
           estimatedNetProfit >= 0 ? 'الربح' : 'الخسارة'
-        } (${Math.abs(estimatedNetProfit).toLocaleString()} ج.م) لحساب الأرباح والخسائر.`
+        } (${(Math.abs(estimatedNetProfit || 0)).toLocaleString()} ج.م) لحساب الأرباح والخسائر.`
       )
     ) {
       return;
@@ -130,7 +130,7 @@ export const YearEndClosingModal: React.FC<YearEndClosingModalProps> = ({
                 <span>إجمالي الإيرادات (3)</span>
               </div>
               <div className="text-lg font-black text-slate-900 font-mono">
-                {totalRevenue.toLocaleString()} ج.م
+                {(totalRevenue || 0).toLocaleString()} ج.م
               </div>
               <div className="text-[11px] text-slate-500">عدد الحسابات: {revenueAccounts.length}</div>
             </div>
@@ -141,7 +141,7 @@ export const YearEndClosingModal: React.FC<YearEndClosingModalProps> = ({
                 <span>إجمالي المصروفات (4)</span>
               </div>
               <div className="text-lg font-black text-slate-900 font-mono">
-                {totalExpense.toLocaleString()} ج.م
+                {(totalExpense || 0).toLocaleString()} ج.م
               </div>
               <div className="text-[11px] text-slate-500">عدد الحسابات: {expenseAccounts.length}</div>
             </div>
@@ -158,7 +158,7 @@ export const YearEndClosingModal: React.FC<YearEndClosingModalProps> = ({
                 <span>صافي {estimatedNetProfit >= 0 ? 'الربح' : 'الخسارة'} المرحل</span>
               </div>
               <div className="text-lg font-black font-mono">
-                {Math.abs(estimatedNetProfit).toLocaleString()} ج.م
+                {(Math.abs(estimatedNetProfit || 0)).toLocaleString()} ج.م
               </div>
               <div className="text-[11px] font-medium">
                 يرحل لحساب: 212 الأرباح (الخسائر) المرحلة

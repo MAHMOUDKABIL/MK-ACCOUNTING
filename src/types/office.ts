@@ -76,8 +76,9 @@ export type TreasuryCategory =
   | 'أخرى';
 
 export interface IncomeCertificateData {
+  hasTaxCard?: boolean; // هل لديه بطاقة ضريبية؟ (نعم / لا)
   grossAnnualRevenue?: number;
-  annualRevenue: number;
+  annualRevenue?: number;
   annualExpenses: number;
   netAnnualIncome: number;
   averageMonthlyIncome?: number;
@@ -87,16 +88,73 @@ export interface IncomeCertificateData {
   revenueSourceDescription?: string;
   periodCovered?: string;
   basisOfCalculation?: string;
+  evidenceType?: 'inspection' | 'tax_returns' | 'bank_statements' | 'witness_affidavit' | 'commercial_records';
 }
 
 export interface InvestedCapitalCertificateData {
+  entityCategory?: 'individual' | 'company'; // أفراد أو شركات
   fixedAssetsValue: number;
   currentAssetsValue: number;
+  inventoryValue?: number;
+  cashAndBanksValue?: number;
+  receivablesValue?: number;
   totalInvestedCapital: number;
   premisesType?: string;
   inspectionDate?: string;
   inspectionDetails?: string;
   capitalDistribution?: string;
+  headquartersAddress?: string;
+}
+
+export interface FinancialSolvencyCertificateData {
+  totalOwnedAssets: number; // إجمالي الأصول المملوكة
+  totalLiabilities: number; // إجمالي الخصوم والالتزامات
+  netSolvencyEquity: number; // صافي الملاءة وحقوق الملكية الفائضة
+  annualOperatingTurnover: number; // حجم التعاملات والعمليات السنوية
+  availableCashLiquidity: number; // السيولة النقدية الحالية بالبنوك والخزينة
+  solvencyRatio: number; // نسبة الملاءة (الأصول إلى الالتزامات)
+  tenderTitle?: string; // اسم المناقصة أو التسهيل
+  solvencyAssessment: string; // إقرار الملاءة وعدم وجود حجوزات أو تعثر
+}
+
+export interface ProfessionalRevenuesExpensesData {
+  syndicateName?: string; // النقابة المهنية (أطباء، مهندسين، محامين، تجاريين)
+  syndicateCardNumber?: string; // رقم القيد بالنقابة
+  clinicOrOfficeName?: string; // اسم العيادة / المكتب الاستشاري
+  professionalGrossRevenue: number; // إجمالي الإيرادات المهنية
+  operatingExpenses: number; // المصروفات العمومية والإدارية المباشرة
+  netProfessionalIncome: number; // صافي الإيراد المهني السنوي
+  averageMonthlyProfessionalIncome: number; // متوسط الإيراد المهني الشهري
+  taxExemptionYears?: number; // سنوات الإعفاء بالقانون (إن وجد)
+}
+
+export interface BankAuditCertificateData {
+  bankName: string;
+  facilityTypeRequested: string; // قرض متوسط الأجل، اعتماد مستندي، خطابات ضمان
+  annualBankDeposits: number; // إجمالي الإيداعات البنكية السنوية
+  averageMonthlyTurnover: number; // متوسط حركة الحساب الشهري
+  existingDebtObligations: number; // الالتزامات البنكية القائمة
+  auditorCreditOpinion: string; // رأي المحاسب القانوني في الجدارة الائتمانية والتدفقات
+}
+
+export interface AssetValuationData {
+  machineryAndEquipmentValue: number;
+  vehiclesAndTransportationValue: number;
+  realEstateAndPremisesValue: number;
+  officeFurnitureAndDevicesValue: number;
+  totalMarketValuation: number;
+  totalBookValuation: number;
+  valuationMethod: string; // القيمة السوقية العادلة / القيمة الاستبدالية
+  inspectionCommittee: string;
+}
+
+export interface TaxClearanceCertificateData {
+  lastInspectedTaxYear: string; // آخر سنة تم فحصها نهائياً
+  corporateTaxStatus: string; // موقف ضريبة الدخل
+  vatTaxStatus: string; // موقف ضريبة القيمة المضافة
+  payrollTaxStatus: string; // موقف كسب العمل
+  socialInsuranceStatus: string; // موقف التأمينات الاجتماعية
+  noLawsuitsCertificate: boolean; // خلو المنشأة من قضايا التهرب أو النزاعات
 }
 
 export interface WorkingCapitalCertificateData {
@@ -127,16 +185,34 @@ export interface TreasuryTransaction {
   createdAt: string;
 }
 
-export type CertificateType = 'income' | 'invested_capital' | 'working_capital';
+export type CertificateType =
+  | 'income_no_tax'         // شهادة إثبات دخل للأفراد (ليس لهم بطاقة ضريبية)
+  | 'income_with_tax'       // شهادة إثبات دخل للأفراد (لهم بطاقة ضريبية)
+  | 'income'                // شهادة إثبات دخل عامة
+  | 'invested_capital'      // شهادة رأس المال المستثمر للشركات والأفراد
+  | 'financial_solvency'    // شهادة القدرة المالية والملاءة المالية
+  | 'revenue_expenses'      // شهادة إيرادات ومصروفات مهنية (أصحاب المهن الحرة)
+  | 'audit_bank_facility'   // شهادة فحص وتدقيق للتمويل والقروض وتأييد الحسابات البنكية
+  | 'asset_valuation'       // شهادة حصر وتقييم أصول وممتلكات ومعدات
+  | 'tax_clearance'         // شهادة الموقف الضريبي والتأميني وخلو الالتزامات
+  | 'working_capital'       // شهادة رأس المال العامل ومؤشرات السيولة
+  | 'custom';               // شهادات مهنية مخصصة
 
 export interface AccountingCertificate {
   id: string;
   serialNumber: string; // CERT-2026-0001
   certificateType: CertificateType;
+  certificateTitle?: string; // e.g. "شهادة إثبات دخل" or "شهادة دخل"
   clientId?: string;
-  clientName: string;
+  clientName: string; // الاسم الرباعي لصاحب الشأن
+  nationalId?: string; // الرقم القومي (14 رقم)
+  address?: string; // العنوان ومحل الإقامة
+  profession?: string; // المهنة أو النشاط
+  professionOrActivity?: string; // المهنة أو النشاط التجاري/المهني
+  facilityName?: string; // اسم المنشأة أو المحل أو الشركة
   facilityType?: string;
   taxCardNumber?: string;
+  taxFileNumber?: string;
   commercialReg?: string;
   taxOffice?: string;
   issueDate: string;
@@ -146,36 +222,61 @@ export interface AccountingCertificate {
   issuedToParty: string; // الجهة الموجه إليها الشهادة (بنك، مرور، تمويل عقاري، الخ)
   currency?: string;
 
+  // Additional Metadata
+  hasTaxCard?: boolean; // هل لديه بطاقة ضريبية؟
+  entityCategory?: 'individual' | 'company'; // أفراد أو شركات
+  qrCodeDataUrl?: string; // كود QR المولد للتحقق
+  verificationUrl?: string; // رابط التحقق الرسمي
+  verificationHash?: string; // هاش رقمي للأمان
+
   // 1. Fields for Income Certificate (شهادة الدخل)
-  professionOrActivity?: string; // المهنة أو النشاط
-  annualRevenue?: number; // إجمالي المبيعات / الإيرادات السنوية
-  annualExpenses?: number; // إجمالي المصروفات السنوية
-  annualNetIncome?: number; // صافي الدخل السنوي
-  monthlyNetIncome?: number; // متوسط صافي الدخل الشهري
-  basisOfCalculation?: string; // مستند إلى الإقرارات الضريبية والدفاتر
+  annualRevenue?: number;
+  grossAnnualRevenue?: number;
+  annualExpenses?: number;
+  annualNetIncome?: number;
+  netAnnualIncome?: number;
+  monthlyNetIncome?: number;
+  averageMonthlyIncome?: number;
+  basisOfCalculation?: string;
   incomeData?: IncomeCertificateData;
 
   // 2. Fields for Invested Capital Certificate (شهادة رأس المال المستثمر)
-  fixedAssetsValue?: number; // الأصول الثابتة والمعدات
-  currentAssetsInvested?: number; // الأصول المتداولة المستثمرة
-  totalInvestedCapital?: number; // إجمالي رأس المال المستثمر
-  inspectionDate?: string; // تاريخ المعاينة
+  fixedAssetsValue?: number;
+  currentAssetsInvested?: number;
+  totalInvestedCapital?: number;
+  inspectionDate?: string;
   investedCapitalData?: InvestedCapitalCertificateData;
 
-  // 3. Fields for Working Capital Certificate (شهادة رأس المال العامل)
-  currentAssets?: number; // إجمالي الأصول المتداولة
-  currentLiabilities?: number; // إجمالي الالتزامات المتداولة
-  netWorkingCapital?: number; // صافي رأس المال العامل (أصول - التزامات)
-  workingCapitalRatio?: number; // نسبة رأس المال العامل
+  // 3. Fields for Financial Solvency Certificate (شهادة القدرة المالية والملاءة المالية)
+  solvencyData?: FinancialSolvencyCertificateData;
+
+  // 4. Fields for Professional Revenues and Expenses (شهادة إيرادات ومصروفات مهنية)
+  professionalData?: ProfessionalRevenuesExpensesData;
+
+  // 5. Fields for Bank Audit & Credit Facility (شهادة فحص الحسابات البنكية والتمويل)
+  bankAuditData?: BankAuditCertificateData;
+
+  // 6. Fields for Asset Valuation (شهادة حصر وتقييم أصول)
+  assetValuationData?: AssetValuationData;
+
+  // 7. Fields for Tax and Social Insurance Clearance (شهادة الموقف الضريبي والتأميني)
+  taxClearanceData?: TaxClearanceCertificateData;
+
+  // 8. Fields for Working Capital Certificate (شهادة رأس المال العامل)
+  currentAssets?: number;
+  currentLiabilities?: number;
+  netWorkingCapital?: number;
+  workingCapitalRatio?: number;
   workingCapitalData?: WorkingCapitalCertificateData;
 
   // Certified Signatures & Auditor
   auditorName: string;
   auditorTitle?: string;
-  auditorRegNumber?: string; // س.م.م 44887
+  auditorRegNumber?: string;
   auditorRegisterNumber?: string;
   legalDisclaimer?: string;
   status?: 'issued' | 'draft' | 'cancelled';
   notes?: string;
   createdAt: string;
 }
+

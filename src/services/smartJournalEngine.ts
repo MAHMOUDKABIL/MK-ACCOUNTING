@@ -207,7 +207,7 @@ export const SMART_TEMPLATES: SmartTemplate[] = [
           : 'البنك الأهلي المصري';
 
       return {
-        description: `تحصيل مبلغ ${amt.toLocaleString()} ج.م من العميل (${inputs.customerName || ''}) بموجب إيصال رقم ${inputs.receiptNumber || ''}`,
+        description: `تحصيل مبلغ ${(amt || 0).toLocaleString()} ج.م من العميل (${inputs.customerName || ''}) بموجب إيصال رقم ${inputs.receiptNumber || ''}`,
         referenceDoc: inputs.receiptNumber,
         lines: [
           {

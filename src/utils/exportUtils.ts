@@ -1,4 +1,59 @@
 import * as XLSX from 'xlsx';
+import { printA4Document } from './printA4Document';
+
+/**
+ * Interface for multiple sheets export
+ */
+export interface ExcelSheetData {
+  sheetName: string;
+  data: Record<string, any>[];
+}
+
+/**
+ * Utility to export multiple sheets directly to an Excel workbook (.xlsx)
+ */
+export function exportMultipleSheetsToExcel(
+  sheets: ExcelSheetData[],
+  fileName: string = 'financial_statements.xlsx'
+) {
+  try {
+    const workbook = XLSX.utils.book_new();
+
+    sheets.forEach((sheet) => {
+      const worksheet = XLSX.utils.json_to_sheet(sheet.data);
+
+      // Set Right-to-Left orientation for Arabic sheets
+      if (!worksheet['!views']) {
+        worksheet['!views'] = [{ rightToLeft: true }];
+      }
+
+      // Auto-calculate column widths
+      if (sheet.data.length > 0) {
+        const keys = Object.keys(sheet.data[0]);
+        worksheet['!cols'] = keys.map((k) => {
+          let maxLen = k.length;
+          sheet.data.forEach((row) => {
+            const val = String(row[k] || '');
+            if (val.length > maxLen) {
+              maxLen = Math.min(val.length, 50);
+            }
+          });
+          return { wch: Math.max(maxLen + 4, 14) };
+        });
+      }
+
+      const safeSheetName = sheet.sheetName.replace(/[:\\/?*[\]]/g, '').slice(0, 31);
+      XLSX.utils.book_append_sheet(workbook, worksheet, safeSheetName);
+    });
+
+    const cleanFileName = fileName.endsWith('.xlsx') ? fileName : `${fileName}.xlsx`;
+    XLSX.writeFile(workbook, cleanFileName);
+    return true;
+  } catch (error) {
+    console.error('Error exporting multiple sheets to Excel:', error);
+    return false;
+  }
+}
 
 /**
  * Utility to export tabular data directly to Excel (.xlsx)
@@ -8,40 +63,7 @@ export function exportToExcel(
   fileName: string = 'export.xlsx',
   sheetName: string = 'البيانات'
 ) {
-  try {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    
-    // Set Right-to-Left on worksheet
-    if (!worksheet['!views']) {
-      worksheet['!views'] = [{ rightToLeft: true }];
-    }
-
-    // Auto-calculate column widths
-    if (data.length > 0) {
-      const keys = Object.keys(data[0]);
-      worksheet['!cols'] = keys.map((k) => {
-        let maxLen = k.length;
-        data.forEach((row) => {
-          const val = String(row[k] || '');
-          if (val.length > maxLen) {
-            maxLen = Math.min(val.length, 45);
-          }
-        });
-        return { wch: Math.max(maxLen + 4, 12) };
-      });
-    }
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-    
-    // Ensure filename ends with .xlsx
-    const cleanFileName = fileName.endsWith('.xlsx') ? fileName : `${fileName}.xlsx`;
-    XLSX.writeFile(workbook, cleanFileName);
-    return true;
-  } catch (error) {
-    console.error('Error exporting to Excel:', error);
-    return false;
-  }
+  return exportMultipleSheetsToExcel([{ sheetName, data }], fileName);
 }
 
 /**
@@ -172,8 +194,16 @@ export function exportToWordDoc(
 }
 
 /**
- * Triggers standard browser high-resolution PDF print dialog
+ * Triggers standard browser high-resolution PDF print dialog with zero background bleed
  */
 export function printDocument() {
+  if (typeof document !== 'undefined') {
+    const a4El = document.querySelector('.print-a4-container') as HTMLElement;
+    if (a4El) {
+      printA4Document(a4El, document.title || 'وثيقة محاسبية معتمدة');
+      return;
+    }
+    document.body.classList.add('a4-modal-open');
+  }
   window.print();
 }
